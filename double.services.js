@@ -18,6 +18,7 @@ if (Meteor.isClient) {
 
 if (Meteor.isServer) {
   Meteor.startup(function () {
+    console.log("adder: ", Adder);
     // code to run on server at startup
   });
 }
