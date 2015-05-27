@@ -18,7 +18,8 @@ if (Meteor.isClient) {
 
 if (Meteor.isServer) {
   Meteor.startup(function () {
-    console.log("adder: ", Adder);
+    // console.log("D: ", D, D.Channels);
+    console.log("SlackServices: ", SlackService);
     // code to run on server at startup
   });
 }
