@@ -6,23 +6,15 @@
           <tr>
             <th>Type</th>
             <th>Name</th>
-            <th># Messages</th>
             <th>Last Message</th>
           </tr>
         </thead>
         <tbody>
           {{#each channels}}
             <tr class="channel-row">
-              <td>{{type}}</td>
-              <td>{{name}}</td>
-              <td>
-                {{#if messageCount}}
-                  {{messageCount}}
-                {{else}}
-                  0
-                {{/if}}
-              </td>
-              <td>{{formatTS lastMessageTS}}</td>
+              <td>{{extra.channelType}}</td>
+              <td>{{extra.channelName}}</td>
+              <td>{{formatTS extra.lastMessageTS}}</td>
             </tr>
           {{/each}}
         </tbody>
