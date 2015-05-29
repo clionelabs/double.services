@@ -1,35 +1,35 @@
 Template.slackMain.rendered = function() {
   let team = SlackService.Teams.findOne();
   if (team) {
-    Session.set("mainTabActiveTeamId", team.teamId);
+    Session.set("slackMainActiveTeamId", team.teamId);
   }
 };
 
 Template.slackMain.destroyed = function() {
-  Session.set("mainTabActiveTeamId", null);
+  Session.set("slackMainActiveTeamId", null);
 };
 
 Template.slackMain.events({
   'click .team-tab': function(event) {
-    Session.set("mainTabActiveTeamId", this.teamId);
+    Session.set("slackMainActiveTeamId", this.teamId);
   },
 
   'click .team-setup-tab': function(event) {
-    Session.set("mainTabActiveTeamId", null);
+    Session.set("slackMainActiveTeamId", null);
   }
 });
 
 Template.slackMain.helpers({
   isActiveTeam: function(team) {
-    return Session.get("mainTabActiveTeamId") === team.teamId;
+    return Session.get("slackMainActiveTeamId") === team.teamId;
   },
 
   isSetup: function() {
-    return !Session.get("mainTabActiveTeamId");
+    return !Session.get("slackMainActiveTeamId");
   },
 
   activeTeam: function() {
-    let teamId = Session.get("mainTabActiveTeamId");
+    let teamId = Session.get("slackMainActiveTeamId");
     return SlackService.Teams.findOne({teamId: teamId});
   }
 });

@@ -6,6 +6,7 @@ _.extend(SlackService, {
         client.init(team.authToken);
       },
       removed: function(team) {
+        // TODO handle
       }
     });
   }
