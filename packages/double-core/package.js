@@ -15,7 +15,8 @@ Package.onUse(function(api) {
   api.use('grigio:babel');
   api.addFiles([
     'lib/_d.es6.js',
-    'lib/channels.es6.js'
+    'lib/channels.es6.js',
+    'lib/messages.es6.js'
   ]);
   api.export('D');
 });
