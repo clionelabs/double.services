@@ -1,0 +1,33 @@
+<Template name="slackTeam">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Name</th>
+            <th># Messages</th>
+            <th>Last Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each channels}}
+            <tr class="channel-row">
+              <td>{{type}}</td>
+              <td>{{name}}</td>
+              <td>
+                {{#if messageCount}}
+                  {{messageCount}}
+                {{else}}
+                  0
+                {{/if}}
+              </td>
+              <td>{{formatTS lastMessageTS}}</td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</Template>
+
