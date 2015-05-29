@@ -20,9 +20,3 @@ Package.onUse(function(api) {
   ]);
   api.export('D');
 });
-
-Package.onTest(function(api) {
-  api.use('tinytest');
-  api.use('core');
-  api.addFiles('core-tests.js');
-});
