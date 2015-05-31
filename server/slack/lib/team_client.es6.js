@@ -64,11 +64,15 @@ SlackService.TeamClient = {
         category: D.Channels.Categories.SLACK,
         identifier: channel.id,
         extra: {
-          channelId: channel.id,
-          channelName: channel.name,
-          channelType: channel.getType(),
-          teamId: self.client.team.id,
-          teamName: self.client.team.name,
+          channel: {
+            id: channel.id,
+            name: channel.name,
+            type: channel.getType()
+          },
+          team: {
+            id: self.client.team.id,
+            name: self.client.team.name
+          }
         }
       },
       $setOnInsert: {
