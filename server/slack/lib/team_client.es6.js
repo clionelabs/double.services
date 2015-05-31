@@ -10,11 +10,11 @@ SlackService.TeamClient = {
    */
   init: function(authToken) {
     let self = this;
-    this.client = new Slack(authToken, true, true); // autoReconnect = true, autoMark = true
-    this.client.on('open', Meteor.bindEnvironment(() => {self._clientOnOpen()}));
-    this.client.on('message', Meteor.bindEnvironment((message) => {self._clientOnMessage(message)}));
-    this.client.on('error', Meteor.bindEnvironment(() => {self._clientOnError()}));
-    this.client.login();
+    self.client = new Slack(authToken, true, true); // autoReconnect = true, autoMark = true
+    self.client.on('open', Meteor.bindEnvironment(() => {self._clientOnOpen()}));
+    self.client.on('message', Meteor.bindEnvironment((message) => {self._clientOnMessage(message)}));
+    self.client.on('error', Meteor.bindEnvironment(() => {self._clientOnError()}));
+    self.client.login();
   },
 
   /**
