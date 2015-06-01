@@ -119,20 +119,16 @@ SlackService.TeamClient = {
   _updateChannel(channel) {
     console.log("[SlackService.TeamClient] updating channel: ", channel.name);
     let self = this;
-    let dChannel = self._dChannel(channel);
-    let oldestTS = dChannel && dChannel.extra.lastMessageTS? dChannel.extra.lastMessageTS: null;
+    let dChannel = self._upsertDChannel(channel);
 
-    self._fetchChannelHistory(channel, oldestTS, Meteor.bindEnvironment(function(result) {
+    self._fetchChannelHistory(channel, dChannel.extra.lastMessageTS, Meteor.bindEnvironment(function(result) {
       if (!result.ok) {
         console.log("[SlackService.TeamClient] fetch failed: ", result);
       } else {
         console.log("[SlackService.TeamClient] inserting messages: ", result.messages.length);
-        if (result.messages.length > 0) {
-          let dChannel = self._upsertDChannel(channel);
-          _.each(result.messages, function(message) {
-            self._insertMessage(message, dChannel._id);
-          });
-        }
+        _.each(result.messages, function(message) {
+          self._insertMessage(message, dChannel._id);
+        });
       }
     }));
   },
