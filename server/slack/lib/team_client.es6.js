@@ -8,7 +8,7 @@ SlackService.TeamClient = {
    * Initialize and start slack RTC client, given the authToken
    * @param {String} authToken
    */
-  init: function(authToken) {
+  init(authToken) {
     let self = this;
     self.client = new Slack(authToken, true, true); // autoReconnect = true, autoMark = true
     self.client.on('open', Meteor.bindEnvironment(() => {self._clientOnOpen()}));
@@ -20,7 +20,7 @@ SlackService.TeamClient = {
   /**
    * Callback when RTC client is connected
    */
-  _clientOnOpen: function() {
+  _clientOnOpen() {
     console.log('[SlackService.TeamClient] clientOnOpen: ', this.client.team.name);
     this._updateAllChannels();
   },
@@ -28,7 +28,7 @@ SlackService.TeamClient = {
   /**
    * Callback when RTC client received message
    */
-  _clientOnMessage: function(message) {
+  _clientOnMessage(message) {
     console.log('[SlackService.TeamClient] clientOnMessage: ', this.client.team.name);
     let self = this;
     let channel = self.client.getChannelGroupOrDMByID(message.channel);
@@ -38,7 +38,7 @@ SlackService.TeamClient = {
   /**
    * Callback when RTC client received error
    */
-  _clientOnError: function(error) {
+  _clientOnError(error) {
     console.log('[SlackService.TeamClient] clientOnError: ', error);
   },
 
@@ -46,9 +46,8 @@ SlackService.TeamClient = {
    * Get the D.Channel selector for a given slack channel
    * @param {Object} channel Slack channel object
    */
-  _dChannelSelector: function(channel) {
-    let channelSelector = {category: D.Channels.Categories.SLACK, identifier: channel.id};
-    return channelSelector;
+  _dChannelSelector(channel) {
+    return {category: D.Channels.Categories.SLACK, identifier: channel.id};
   },
 
   /**
@@ -56,29 +55,21 @@ SlackService.TeamClient = {
    * @param {Object} channel Slack channel object
    * @return {D.Channel}
    */
-  _upsertDChannel: function(channel) {
+  _upsertDChannel(channel) {
     let self = this;
     let dChannelSelector = self._dChannelSelector(channel);
     let options = {
       $set: {
-        category: D.Channels.Categories.SLACK,
-        identifier: channel.id,
-        extra: {
-          channel: {
-            id: channel.id,
-            name: channel.name,
-            type: channel.getType()
-          },
-          team: {
-            id: self.client.team.id,
-            name: self.client.team.name
-          }
-        }
+        'category': D.Channels.Categories.SLACK,
+        'identifier': channel.id,
+        'extra.channel.id': channel.id,
+        'extra.channel.name': channel.name,
+        'extra.channel.type': channel.getType(),
+        'extra.team.id': self.client.team.id,
+        'extra.team.name': self.client.team.name
       },
       $setOnInsert: {
-        extra: {
-          lastMessageTS: 0
-        }
+        'extra.lastMessageTS': 0
       }
     };
     D.Channels.upsert(dChannelSelector, options);
@@ -90,7 +81,7 @@ SlackService.TeamClient = {
    * @param {Object} channel Slack channel object
    * @return {D.Channel} D.Channel, null if not existed
    */
-  _dChannel: function(channel) {
+  _dChannel(channel) {
     let channelSelector = this._dChannelSelector(channel);
     return D.Channels.findOne(channelSelector);
   },
@@ -98,7 +89,7 @@ SlackService.TeamClient = {
   /**
    * Update D.Channels and D.Messages for all slack channels involved by the authenticated slack user.
    */
-  _updateAllChannels: function() {
+  _updateAllChannels() {
     let self = this;
     _.each(_.values(self.client.channels), function(channel) {
       if (channel.is_member) {
@@ -125,7 +116,7 @@ SlackService.TeamClient = {
    * @params {Object} channel Slack channel object
    * .
    */
-  _updateChannel: function(channel) {
+  _updateChannel(channel) {
     console.log("[SlackService.TeamClient] updating channel: ", channel.name);
     let self = this;
     let dChannel = self._dChannel(channel);
@@ -138,14 +129,9 @@ SlackService.TeamClient = {
         console.log("[SlackService.TeamClient] inserting messages: ", result.messages.length);
         if (result.messages.length > 0) {
           let dChannel = self._upsertDChannel(channel);
-          let oldestTS = dChannel.extra.lastMessageTS;
           _.each(result.messages, function(message) {
             self._insertMessage(message, dChannel._id);
-            if (!oldestTS || message.ts > oldestTS) oldestTS = message.ts;
           });
-          if (!dChannel.extra.lastMessageTS || oldestTS > dChannel.extra.lastMessageTS) {
-            D.Channels.update(dChannel._id, {$set: {'extra.lastMessageTS': oldestTS}});
-          }
         }
       }
     }));
@@ -155,7 +141,7 @@ SlackService.TeamClient = {
    * @params {Object} message Slack message
    * @params {String} dChannelId
    */
-  _insertMessage: function(message, dChannelId) {
+  _insertMessage(message, dChannelId) {
     let self = this;
     if (message.type === 'message') {
       let userId = message.user;
@@ -169,6 +155,7 @@ SlackService.TeamClient = {
         }
       }
       D.Messages.insert(options);
+      D.Channels.update(dChannelId, {$max: {'extra.lastMessageTS': message.ts}});
     }
   },
 
@@ -178,15 +165,10 @@ SlackService.TeamClient = {
    * @params {String} oldestTS Only fetch messages after timestamp (slack format)
    * @params {Fn} callback Callback when api call is done
    */
-  _fetchChannelHistory: function(channel, oldestTS, callback) {
+  _fetchChannelHistory(channel, oldestTS, callback) {
     let self = this;
-    let method = 'channels.history';
-    if (channel.getType() === 'Group') {
-      method = 'groups.history';
-    } else if (channel.getType() === 'DM') {
-      method = 'im.history';
-    }
 
+    let method = self._fetchChannelMethod(channel);
     let teamId = self.client.team.id;
     let channelId = channel.id;
 
@@ -197,7 +179,20 @@ SlackService.TeamClient = {
     if (oldestTS) {
       _.extend(params, {oldest: oldestTS});
     }
-
     self.client._apiCall(method, params, callback);
+  },
+
+  /**
+   * Get the API method for fetching history of a channel, depending on the type (channel, im, or gorup)
+   * @params {Object} channel Slack channel object
+   */
+  _fetchChannelMethod(channel) {
+    let method = 'channels.history';
+    if (channel.getType() === 'Group') {
+      method = 'groups.history';
+    } else if (channel.getType() === 'DM') {
+      method = 'im.history';
+    }
+    return method;
   }
 }
