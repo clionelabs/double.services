@@ -3,7 +3,10 @@ var setupAdmin = function() {
     let email = Meteor.settings.adminAccount.email;
     let password = Meteor.settings.adminAccount.password;
     if (!Meteor.users.findOne({emails: {$elemMatch: {address: email}}})) {
-      let userId = Accounts.createUser({email: email, password: password});
+      Users.createAdmin({
+        email: email,
+        password: password
+      });
     }
   }
 }

@@ -12,8 +12,8 @@
         <tbody>
           {{#each channels}}
             <tr class="channel-row">
-              <td>{{extra.channelType}}</td>
-              <td>{{extra.channelName}}</td>
+              <td>{{extra.channel.type}}</td>
+              <td>{{extra.channel.name}}</td>
               <td>{{formatTS extra.lastMessageTS}}</td>
             </tr>
           {{/each}}
