@@ -9,6 +9,10 @@ D.Channels = new Meteor.Collection("d-channels", {
   }
 });
 
+D.Channels.Categories = {
+  SLACK: 'SLACK'
+}
+
 D.Channel = {
 
 }
