@@ -14,6 +14,7 @@ Package.onUse(function(api) {
   api.versionsFrom('1.1.0.2');
   api.use('alanning:roles');
   api.use('grigio:babel');
+  api.use('underscore');
   api.addFiles([
     'lib/_d.es6.js',
     'lib/channels.es6.js',
