@@ -140,11 +140,14 @@ SlackService.TeamClient = {
   _insertMessage(message, dChannelId) {
     let self = this;
     if (message.type === 'message') {
+      let selfUserId = this.client.self.id;
       let userId = message.user;
       let userName = userId? self.client.users[userId].name: '=UNKNOWN=';
+      let inOut = selfUserId === userId? D.Messages.InOut.OUT: D.Messages.InOut.IN;
       let options = {
         channelId: dChannelId,
         content: message.text,
+        inOut: inOut,
         extra: {
           userName: userName,
           ts: message.ts
