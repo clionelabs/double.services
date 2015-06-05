@@ -166,13 +166,12 @@ SlackService.TeamClient = {
    * @params {String} text
    */
   _decodeMessageText: function(text) {
-    // quick check if the text contains user encoding phrases
-    if (text.match('<@U.*>')) {
-      _.each(_.values(this.client.users), function(user) {
-        text = text.replace(`<@${user.id}>`, `@${user.name}`);
-      });
-    }
-    return text;
+    let self = this;
+    let decodedText = text.replace(/<@(U.*?)>/g, function(match, p1) {
+      let user = self.client.users[p1];
+      return user? `@${user.name}`: match;
+    });
+    return decodedText;
   },
 
   /**
