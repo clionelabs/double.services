@@ -144,9 +144,10 @@ SlackService.TeamClient = {
       let userId = message.user;
       let userName = userId? self.client.users[userId].name: '=UNKNOWN=';
       let inOut = selfUserId === userId? D.Messages.InOut.OUT: D.Messages.InOut.IN;
+      let decodedText = self._decodeMessageText(message.text);
       let options = {
         channelId: dChannelId,
-        content: message.text,
+        content: decodedText,
         inOut: inOut,
         extra: {
           userName: userName,
@@ -156,6 +157,22 @@ SlackService.TeamClient = {
       D.Messages.insert(options);
       D.Channels.update(dChannelId, {$max: {'extra.lastMessageTS': message.ts}});
     }
+  },
+
+  /**
+   * Decode slack message content
+   * <@Uxxxxxxxx> -> @username
+   *
+   * @params {String} text
+   */
+  _decodeMessageText: function(text) {
+    // quick check if the text contains user encoding phrases
+    if (text.match('<@U.*>')) {
+      _.each(_.values(this.client.users), function(user) {
+        text = text.replace(`<@${user.id}>`, `@${user.name}`);
+      });
+    }
+    return text;
   },
 
   /**
