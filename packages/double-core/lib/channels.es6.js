@@ -39,7 +39,14 @@ D.Channels.Categories = {
 }
 
 D.Channel = {
-  messages() {
-    return D.Messages.find({channelId: this._id});
+  messages(options = {}) {
+    return D.Messages.find({channelId: this._id}, options);
+  },
+  lastMessage() {
+    return D.Messages.findOne({channelId: this._id}, {sort: {timestamp: -1}});
+  },
+  isNotReplied() {
+    let lastMessage = this.lastMessage();
+    return lastMessage && lastMessage.inOut == D.Messages.InOut.IN;
   }
 }
