@@ -145,10 +145,12 @@ SlackService.TeamClient = {
       let userName = userId? self.client.users[userId].name: '=UNKNOWN=';
       let inOut = selfUserId === userId? D.Messages.InOut.OUT: D.Messages.InOut.IN;
       let decodedText = self._decodeMessageText(message.text);
+      let timestamp = moment.unix(message.ts).valueOf();
       let options = {
         channelId: dChannelId,
         content: decodedText,
         inOut: inOut,
+        timestamp: timestamp,
         extra: {
           userName: userName,
           ts: message.ts
