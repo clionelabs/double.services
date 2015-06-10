@@ -4,6 +4,8 @@ SlackService.TeamClient = {
 
   client: null,
 
+  _sentMessageIds: {},
+
   /*
    * Initialize and start slack RTC client, given the authToken
    * @param {String} authToken
@@ -13,6 +15,7 @@ SlackService.TeamClient = {
     self.client = new Slack(authToken, true, true); // autoReconnect = true, autoMark = true
     self.client.on('open', Meteor.bindEnvironment(() => {self._clientOnOpen()}));
     self.client.on('message', Meteor.bindEnvironment((message) => {self._clientOnMessage(message)}));
+    self.client.on('messageSent', Meteor.bindEnvironment((message) => {self._clientOnMessageSent(message)}));
     self.client.on('error', Meteor.bindEnvironment(() => {self._clientOnError()}));
     self.client.login();
   },
@@ -23,6 +26,7 @@ SlackService.TeamClient = {
   _clientOnOpen() {
     console.log('[SlackService.TeamClient] clientOnOpen: ', this.client.team.name);
     this._updateAllChannels();
+    this._observingOutingMessages();
   },
 
   /**
@@ -31,6 +35,21 @@ SlackService.TeamClient = {
   _clientOnMessage(message) {
     console.log('[SlackService.TeamClient] clientOnMessage: ', this.client.team.name);
     let self = this;
+    let channel = self.client.getChannelGroupOrDMByID(message.channel);
+    self._updateChannel(channel);
+  },
+
+  /**
+   * Callback when RTC client received messageSent
+   */
+  _clientOnMessageSent(message) {
+    console.log('[SlackService.TeamClient] clientOnMessageSent: ', this.client.team.name);
+    let self = this;
+    let dMessageId = self._sentMessageIds[message.id];
+    if (dMessageId) {
+      // Set it as OUTING_DELIEVERED, and remove them later when we done fetching history
+      D.Messages.update(dMessageId, {$set: {inOut: D.Messages.InOut.OUTING_DELIVERED}});
+    }
     let channel = self.client.getChannelGroupOrDMByID(message.channel);
     self._updateChannel(channel);
   },
@@ -126,11 +145,19 @@ SlackService.TeamClient = {
         console.log("[SlackService.TeamClient] fetch failed: ", result);
       } else {
         console.log("[SlackService.TeamClient] inserting messages: ", result.messages.length);
+        self._removeOutingDelieveredMessages(dChannel);
         _.each(result.messages, function(message) {
           self._insertMessage(message, dChannel._id);
         });
       }
     }));
+  },
+
+  /**
+   * Remove all outbound delievered dmessage
+   */
+  _removeOutingDelieveredMessages(dChannel) {
+    D.Messages.remove({channelId: dChannel._id, inOut: D.Messages.InOut.OUTING_DELIVERED});
   },
 
   /**
@@ -150,11 +177,8 @@ SlackService.TeamClient = {
         channelId: dChannelId,
         content: decodedText,
         inOut: inOut,
-        timestamp: timestamp,
-        extra: {
-          userName: userName,
-          ts: message.ts
-        }
+        userName: userName,
+        timestamp: timestamp
       }
       D.Messages.insert(options);
       D.Channels.update(dChannelId, {$max: {'extra.lastMessageTS': message.ts}});
@@ -211,5 +235,58 @@ SlackService.TeamClient = {
       method = 'im.history';
     }
     return method;
+  },
+
+  /**
+   * Observing outing message, and relaying them to slack
+   */
+  _observingOutingMessages() {
+    let self = this;
+    D.Messages.find({inOut: D.Messages.InOut.OUTING}).observe({
+      teamClient: self,
+      added: function(message) {
+        this.teamClient._handleOutingMessage(message);
+      }
+    });
+  },
+
+  /**
+   * handle outing message. First, check and see if this slack client is responsible for the message.
+   * If not, ignore it. Otherwise, send it to slack
+   *
+   * @param {D.Message} dMessage
+   */
+  _handleOutingMessage(dMessage) {
+    let self = this;
+    let dChannel = D.Channels.findOne(dMessage.channelId);
+    let channelId = dChannel.extra.channel.id;
+    if (dChannel.category !== D.Channels.Categories.SLACK) {
+      return;
+    }
+    if (_.indexOf(_.keys(self.client.channels), channelId) === -1) {
+      return;
+    }
+
+    let channel = self.client.channels[channelId];
+    let result = channel.send(dMessage.content);
+    let sentMessageId = result.id;
+    self._sentMessageIds[sentMessageId] = dMessage._id;
+  },
+
+  /**
+   * @param {Object} channel Slack channel object
+   * @param {String} content Message content
+   */
+  _sendMessage(channel, content, callback) {
+    let self = this;
+    let method = 'chat.postMessage';
+    let params = {
+      channel: channel.id,
+      text: content,
+      as_user: true,
+    }
+    self.client._apiCall(method, params, Meteor.bindEnvironment(function(result) {
+      callback(result);
+    }));
   }
 }

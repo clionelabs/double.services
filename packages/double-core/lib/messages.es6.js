@@ -8,5 +8,7 @@ D.Messages = new Meteor.Collection("d-messages");
 
 D.Messages.InOut = {
   IN: 1,
-  OUT: 2
+  OUT: 2,
+  OUTING: 3,
+  OUTING_DELIVERED: 4
 }
