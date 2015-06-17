@@ -1,0 +1,19 @@
+<Template name="notificationMain">
+  <div id="notification-main-container" class="container-fluid">
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <table class="table table-hover">
+          <tbody>
+            {{#each channels}}
+              <tr>
+                <td>{{extra.team.name}} - {{extra.channel.name}}</td>
+                <td>{{notification.state}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</Template>
+

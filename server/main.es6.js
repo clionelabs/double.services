@@ -14,5 +14,12 @@ var setupAdmin = function() {
 Meteor.startup(function () {
   setupAdmin();
 
-  SlackService.startup();
+  if (Meteor.settings.enabledServices) {
+    if (Meteor.settings.enabledServices.slack) {
+      SlackService.startup();
+    }
+    if (Meteor.settings.enabledServices.notification) {
+      NotificationService.startup();
+    }
+  }
 });
