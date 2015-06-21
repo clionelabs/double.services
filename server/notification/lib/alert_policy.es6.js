@@ -1,29 +1,41 @@
-NotificationService.AlertPolicy = {
-  channelHandlers: {},
+/**
+ * Alert policy for pending-reply channels
+ *
+ * Current alert policy:
+ *   - Upon entering `Pending Reply`, wait for X seconds for double to reply. Otherwise, fire up
+ *   an alert message to the double slack DM
+ *   - Afterwards, it the channel stays "Pending Reply', fire up an alert messages to the global slack channel after Y seconds
+ *
+ * @property {String} channelId
+ * @property {Object[]} schedules
+ */
+NotificationService.AlertPolicies = new Meteor.Collection("d-services-notification-alertpolicies");
 
-  startChannelAlert(channelId) {
-    let job = new Job(NotificationService.AlertJobs, 'slack', {
-      channelId: channelId
-    });
-    job.priority('normal').delay(10 * 1000).save();
-
-    /*
-    console.log("[NotificationService.AlertPolicy] startChannelAlert: ", channelId);
-    this.endChannelAlert(channelId);
-    let handler = Meteor.setInterval(function() {
-      console.log("alerting channel: ", channelId);
-    }, 10000);
-    this.channelHandlers[channelId] = handler;
-    */
+_.extend(NotificationService.AlertPolicies, {
+  AlertTargets: {
+    INDIVIDUAL: 'Individual',
+    GLOBAL: 'Global'
   },
 
-  endChannelAlert(channelId) {
-    /*
-    console.log("[NotificationService.AlertPolicy] endChannelAlert: ", channelId);
-    let handler = this.channelHandlers[channelId];
-    if (!handler) return;
-    Meteor.clearInterval(handler);
-    */
-  }
-}
+  createForChannelIfNotExists(channel) {
+    let self = this;
+    let policy = NotificationService.AlertPolicies.findOne({channelId: channel._id});
+    if (!!policy) return;
 
+    let delayIndividual = Meteor.settings.notificationService.alertDelayInSecs.individual;
+    let delayGlobal = Meteor.settings.notificationService.alertDelayInSecs.global;
+
+    let doc = {
+      channelId: channel._id,
+      schedules: [
+        {notifyAt: moment().add(delayIndividual, 's').valueOf(), target: self.AlertTargets.INDIVIDUAL},
+        {notifyAt: moment().add(delayGlobal, 's').valueOf(), target: self.AlertTargets.GLOBAL}
+      ]
+    };
+    NotificationService.AlertPolicies.insert(doc);
+  },
+
+  removeForChannel(channel) {
+    NotificationService.AlertPolicies.remove({channelId: channel._id});
+  }
+});

@@ -1,3 +1,6 @@
+/**
+ * extend D.Channel with the notification state machine
+ */
 NotificationService.Channel = {
   findOne(selector) {
     let channel = D.Channels.findOne(selector, {transform: function(doc) {

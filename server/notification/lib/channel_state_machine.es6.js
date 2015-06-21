@@ -1,5 +1,9 @@
 /**
- * Attach state machine behaviour to DChannel
+ * Notification state machine for DChannel
+ *   States: Replied, Pending, Acknowledged
+ *   Events: Inbound, Outbound, Acknowledge
+ *
+ * going into Pending state will trigger alert policy, while moving out of it will stop it.
  *
  * @param {D.Channel} channel
  **/
@@ -26,22 +30,22 @@ NotificationService.ChannelStateMachine = function(channel) {
         D.Channels.update(channel._id, {$set: {'notification.state': to}});
       },
       onenterpending: function(event, from, to) {
-        if (from === 'none') return;
-        console.log("onenterpending: ", event, from, to);
         let channel = this;
-        NotificationService.AlertPolicy.startChannelAlert(channel._id);
+        if (from === 'none') return;
+        console.log("onenterpending: ", channel.extra.channel.name, event, from, to);
+        NotificationService.AlertPolicies.createForChannelIfNotExists(channel);
       },
       onenterreplied: function(event, from, to) {
-        if (from === 'none') return;
-        console.log("onenterreplied: ", event, from, to);
         let channel = this;
-        NotificationService.AlertPolicy.endChannelAlert(channel._id);
+        if (from === 'none') return;
+        console.log("onenterpending: ", channel.extra.channel.name, event, from, to);
+        NotificationService.AlertPolicies.removeForChannel(channel);
       },
       onenteracknowledged: function(event, from, to) {
-        if (from === 'none') return;
-        console.log("onenteracknowledged: ", event, from, to);
         let channel = this;
-        NotificationService.AlertPolicy.endChannelAlert(channel._id);
+        if (from === 'none') return;
+        console.log("onenterpending: ", channel.extra.channel.name, event, from, to);
+        NotificationService.AlertPolicies.removeForChannel(channel);
       }
     }
   });
