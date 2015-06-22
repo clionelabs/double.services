@@ -2,5 +2,21 @@
   "adminAccount": {
     "email": "admin@askdouble.com",
     "password": "uSTeuMgbykK2uFrvX"
+  },
+
+  "enabledServices": {
+    "slack": true,
+    "notification": true
+  },
+
+  "notificationService": {
+    "slack": {
+      "token": "SLACK_API_TOKEN",
+      "channelName": "CHANNEL_NAME_FOR_RECEIVING_NOTIFICATION"
+    },
+    "alertDelayInSecs": {
+      "individual": 60,
+      "global": 10 * 60
+    }
   }
 }
