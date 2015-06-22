@@ -16,7 +16,7 @@ NotificationService.SlackTeamClient = {
     self._notifyChannelName = notifyChannelName;
     self.client = new Slack(authToken, true, true); // autoReconnect = true, autoMark = true
     self.client.on('open', Meteor.bindEnvironment(() => {self._clientOnOpen()}));
-    self.client.on('error', Meteor.bindEnvironment(() => {self._clientOnError()}));
+    self.client.on('error', Meteor.bindEnvironment((error) => {self._clientOnError(error)}));
     self.client.login();
     self._initCallback = callback;
   },
