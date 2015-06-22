@@ -25,12 +25,24 @@ NotificationService.SlackTeamClient = {
    * Send notification message to slack
    */
   sendNotification(data) {
-    console.log("data: ", data);
     let dChannelId = data.dChannelId;
     let dChannel = D.Channels.findOne(dChannelId);
-    let customer = Meteor.users.findOne(dChannel.customerId);
+    let customer = Users.findOneCustomer(dChannel.customerId);
+    let assistant = customer.assistant();
+    let contentPrefix = '';
+
+    if (data.alertTarget === NotificationService.AlertPolicies.AlertTargets.GLOBAL) {
+      contentPrefix = "<!channel>: ";
+    } else if (data.alertTarget === NotificationService.AlertPolicies.AlertTargets.INDIVIDUAL) {
+      if (assistant) {
+        let slackUser = NotificationService.SlackUsers.findOne({assistantId: assistant._id});
+        if (slackUser) {
+          contentPrefix = `<@${slackUser.slackId}|${slackUser.slackName}>: `;
+        }
+      }
+    }
     let content = `Hey, You have a new messaging coming from ${customer.profile.firstname} through channel - ${dChannel.extra.channel.name}`;
-    // TODO: notify double's DM if data.alertTarget === 'Individual'
+    content = contentPrefix + content;
     this._notifyChannel.send(content);
   },
 
@@ -45,6 +57,9 @@ NotificationService.SlackTeamClient = {
         self._notifyChannel = channel;
       }
     });
+
+    self._updateUsers();
+
     if (self._initCallback) {
       self._initCallback();
     }
@@ -56,4 +71,11 @@ NotificationService.SlackTeamClient = {
   _clientOnError(error) {
     console.log('[NotificationService.TeamClient] clientOnError: ', error);
   },
+
+  _updateUsers() {
+    let self = this;
+    _.each(self.client.users, function(user) {
+      NotificationService.SlackUsers.upsertUser(user);
+    });
+  }
 }
