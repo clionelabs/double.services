@@ -19,7 +19,8 @@ Package.onUse(function(api) {
     'lib/_d.es6.js',
     'lib/channels.es6.js',
     'lib/messages.es6.js',
-    'lib/users.es6.js'
+    'lib/users.es6.js',
+    'lib/placements.es6.js'
   ]);
   api.export('D');
 });
