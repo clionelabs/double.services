@@ -1,0 +1,43 @@
+<Template name="notificationSlackUsers">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Slack ID</th>
+            <th>Slack Name</th>
+            <th>Asisstant</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each slackUsers}}
+            {{> notificationSlackUserRow}}
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</Template>
+
+<Template name="notificationSlackUserRow">
+  <tr>
+    <td>{{slackId}}</td>
+    <td>{{slackName}}</td>
+    <td>
+      <div class="dropdown">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+          {{assignedAssistantName}}
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+          {{#if hasAssignedAssistant}}
+            <li role="presentation"><a role="menuitem" href="" class="unassign-assistant">--</a></li>
+          {{/if}}
+          {{#each availableAssistants}}
+          <li role="presentation"><a role="menuitem" href="#" class="assign-assistant">{{displayName}}</a></li>
+          {{/each}}
+        </ul>
+      </div>
+    </td>
+  </tr>
+</Template>
