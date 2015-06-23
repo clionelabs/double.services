@@ -15,7 +15,7 @@ Template.notificationSlackUserRow.helpers({
         return '--';
       }
     }
-    let user = D.Users.findOne(this.assistantId) || emptyUser;
+    let user = Users.findOne(this.assistantId) || emptyUser;
     return user.displayName();
   },
 
