@@ -48,11 +48,11 @@ NotificationService.AlertPoliciesExecutor = {
       if (delay < 0) return;
 
       self._timeoutHandlers[alertPolicy._id][index] = Meteor.setTimeout(Meteor.bindEnvironment(function() {
+        console.log("executing schedule: ", schedule);
         self._slackClient.sendNotification({
           dChannelId: alertPolicy.channelId,
           alertTarget: schedule.target
         });
-        console.log("executing schedule: ", schedule);
       }), delay);
     });
   },
