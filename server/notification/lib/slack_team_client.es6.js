@@ -29,21 +29,51 @@ NotificationService.SlackTeamClient = {
     let dChannel = D.Channels.findOne(dChannelId);
     let customer = Users.findOneCustomer(dChannel.customerId);
     let assistant = customer.assistant();
-    let contentPrefix = '';
 
+    let messageData;
     if (data.alertTarget === NotificationService.AlertPolicies.AlertTargets.GLOBAL) {
-      contentPrefix = "<!channel>: ";
+      messageData = this._globalNotifyMessage(customer);
     } else if (data.alertTarget === NotificationService.AlertPolicies.AlertTargets.INDIVIDUAL) {
-      if (assistant) {
-        let slackUser = NotificationService.SlackUsers.findOne({assistantId: assistant._id});
-        if (slackUser) {
-          contentPrefix = `<@${slackUser.slackId}|${slackUser.slackName}>: `;
-        }
-      }
+      messageData = this._individualNotifyMessage(customer, assistant);
     }
-    let content = `Hey, You have a new messaging coming from ${customer.profile.firstname} through channel - ${dChannel.extra.channel.name}`;
-    content = contentPrefix + content;
-    this._notifyChannel.send(content);
+    this._postMessage(messageData);
+  },
+
+  _globalNotifyMessage(customer) {
+    let hash = this._globalHash();
+    let message = `${hash}: I am still waiting~~`;
+    let clientName = customer.displayName();
+
+    return {
+      channel: this._notifyChannel.id,
+      text: message,
+      username: clientName,
+      icon_emoji: ':sob:'
+    }
+  },
+
+  _individualNotifyMessage(customer, assistant) {
+    let hash = this._individualHash(assistant);
+    let message = `Hey ${hash}, I am waiting for your reply~~`;
+    let clientName = customer.displayName();
+
+    return {
+      channel: this._notifyChannel.id,
+      text: message,
+      username: clientName,
+      icon_emoji: ':kissing_heart:'
+    }
+  },
+
+  _globalHash() {
+    return "<!channel>";
+  },
+
+  _individualHash(assistant) {
+    if (!assistant) return '';
+    let slackUser = NotificationService.SlackUsers.findOne({assistantId: assistant._id});
+    if (!slackUser) return '';
+    return `<@${slackUser.slackId}|${slackUser.slackName}>`;
   },
 
   /**
@@ -70,6 +100,10 @@ NotificationService.SlackTeamClient = {
    */
   _clientOnError(error) {
     console.log('[NotificationService.TeamClient] clientOnError: ', error);
+  },
+
+  _postMessage(messageData) {
+    this.client._apiCall('chat.postMessage', messageData);
   },
 
   _updateUsers() {
