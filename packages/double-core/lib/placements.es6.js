@@ -3,7 +3,7 @@
  * @property {String} assistantId
  */
 
-D.Placements = new Meteor.Collection("placements", {
+D.Placements = new Meteor.Collection("d-placements", {
   transform: (doc) => {
     return _.extend(doc, D.Placement);
   }
