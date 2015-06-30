@@ -245,7 +245,6 @@ SlackService.TeamClient = {
     D.Messages.find({inOut: D.Messages.InOut.OUTING}).observe({
       teamClient: self,
       added: function(message) {
-        console.log("[SlackService.TeamClient] observed outbound message: ", JSON.stringify(message));
         this.teamClient._handleOutingMessage(message);
       }
     });
@@ -266,6 +265,8 @@ SlackService.TeamClient = {
     }
     let channel = self.client.getChannelGroupOrDMByID(channelId);
     if (!channel) return;
+
+    console.log("[SlackService.TeamClient] ", self.client.team.name, "sending out message: ", JSON.stringify(dMessage));
 
     let result = channel.send(dMessage.content);
     let sentMessageId = result.id;
