@@ -6,6 +6,10 @@ SlackService.TeamClient = {
 
   _sentMessageIds: {},
 
+  _observeHandler: null,
+
+  _updatingChannels: {},
+
   /*
    * Initialize and start slack RTC client, given the authToken
    * @param {String} authToken
@@ -138,8 +142,14 @@ SlackService.TeamClient = {
   _updateChannel(channel) {
     console.log("[SlackService.TeamClient] updating channel: ", channel.name);
     let self = this;
-    let dChannel = self._upsertDChannel(channel);
+    if (self._updatingChannels[channel.id]) {
+      console.log("[SlackService.TeamClient] already updating. Return");
+      return;
+    }
 
+    self._updatingChannels[channel.id] = true;
+
+    let dChannel = self._upsertDChannel(channel);
     self._fetchChannelHistory(channel, dChannel.extra.lastMessageTS, Meteor.bindEnvironment(function(result) {
       if (!result.ok) {
         console.log("[SlackService.TeamClient] fetch failed: ", result);
@@ -150,6 +160,7 @@ SlackService.TeamClient = {
           self._insertMessage(message, dChannel._id);
         });
       }
+      self._updatingChannels[channel.id] = false;
     }));
   },
 
@@ -242,7 +253,11 @@ SlackService.TeamClient = {
    */
   _observingOutingMessages() {
     let self = this;
-    D.Messages.find({inOut: D.Messages.InOut.OUTING}).observe({
+
+    if (self._observeHandler) {
+      self._observeHandler.stop();
+    }
+    self._observeHandler = D.Messages.find({inOut: D.Messages.InOut.OUTING}).observe({
       teamClient: self,
       added: function(message) {
         this.teamClient._handleOutingMessage(message);
