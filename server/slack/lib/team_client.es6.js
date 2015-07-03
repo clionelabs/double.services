@@ -254,7 +254,6 @@ SlackService.TeamClient = {
   _observingOutingMessages() {
     let self = this;
 
-    // observe newly created
     if (self._observeHandler) {
       self._observeHandler.stop();
     }
