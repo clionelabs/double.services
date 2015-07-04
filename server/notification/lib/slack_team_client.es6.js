@@ -41,8 +41,8 @@ NotificationService.SlackTeamClient = {
 
   _globalNotifyMessage(customer) {
     let hash = this._globalHash();
-    let message = `${hash}: I am still waiting~~`;
     let clientName = customer.displayName();
+    let message = `${hash}: I am ${clientName}. I am still waiting~~`;
 
     return {
       channel: this._notifyChannel.id,
@@ -54,8 +54,8 @@ NotificationService.SlackTeamClient = {
 
   _individualNotifyMessage(customer, assistant) {
     let hash = this._individualHash(assistant);
-    let message = `Hey ${hash}, I am waiting for your reply~~`;
     let clientName = customer.displayName();
+    let message = `Hey ${hash}, I am ${clientName}. I am waiting for your reply~~`;
 
     return {
       channel: this._notifyChannel.id,
