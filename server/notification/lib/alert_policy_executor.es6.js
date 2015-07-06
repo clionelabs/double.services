@@ -67,8 +67,11 @@ NotificationService.AlertPoliciesExecutor = {
       Meteor.clearTimeout(self._timeoutHandlers[alertPolicy._id][index]);
     });
 
+    //TODO: only send responded notification if at least one alert has been sent before
+    /*
     self._slackClient.sendResponded({
       dChannelId: alertPolicy.channelId
     });
+    */
   }
 }
