@@ -129,6 +129,18 @@ SlackService.TeamClient = {
     });
   },
 
+  _shouldIgnore(channel) {
+    let ignoreChannelNames = null;
+    if (Meteor.settings.slackService && Meteor.settings.slackService.ignoreChannelNames) {
+      ignoreChannelNames = Meteor.settings.slackService.ignoreChannelNames;
+    }
+    if (!ignoreChannelNames) {
+      return false;
+    }
+
+    return _.indexOf(ignoreChannelNames, channel.name) !== -1;
+  },
+
   /**
    * Update D.Channels and D.Messages for a particular slack channel
    * It will
@@ -140,6 +152,8 @@ SlackService.TeamClient = {
    * .
    */
   _updateChannel(channel) {
+    if (this._shouldIgnore(channel)) return;
+
     console.log("[SlackService.TeamClient] updating channel: ", channel.name);
     let self = this;
     if (self._updatingChannels[channel.id]) {

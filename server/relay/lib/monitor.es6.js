@@ -45,8 +45,9 @@ RelayService.Monitor = {
       monitor: self,
       added(message) {
         let channel = D.Channels.findOne(message.channelId);
-        // ONLY consider channels with assigned customers
-        if (channel.customerId) {
+
+        // Ignore spammed channels
+        if (!channel.isSpam) {
           this.monitor.relayMessage(message);
         }
         D.Messages.update(message._id, {$set: {'relay.processed': true}});

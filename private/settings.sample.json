@@ -10,6 +10,10 @@
     "relay": true
   },
 
+  "slackService": {
+    "ignoreChannelNames": ["_client_inbounds", "_client_reminders"]
+  },
+
   "notificationService": {
     "slack": {
       "token": "SLACK_API_TOKEN",
