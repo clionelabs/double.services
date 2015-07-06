@@ -6,7 +6,8 @@
 
   "enabledServices": {
     "slack": true,
-    "notification": true
+    "notification": true,
+    "relay": true
   },
 
   "notificationService": {
@@ -17,6 +18,13 @@
     "alertDelayInSecs": {
       "individual": 60,
       "global": 10 * 60
+    }
+  },
+
+  "relayService": {
+    "slack": {
+      "token": "SLACK_API_TOKEN",
+      "channelName": "CHANNEL_NAME_FOR_RELAYING_MESSAGES"
     }
   }
 }

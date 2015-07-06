@@ -21,5 +21,8 @@ Meteor.startup(function () {
     if (Meteor.settings.enabledServices.notification) {
       NotificationService.startup();
     }
+    if (Meteor.settings.enabledServices.relay) {
+      RelayService.startup();
+    }
   }
 });
