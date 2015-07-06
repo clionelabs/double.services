@@ -39,6 +39,26 @@ NotificationService.SlackTeamClient = {
     this._postMessage(messageData);
   },
 
+  sendResponded(data) {
+    let dChannelId = data.dChannelId;
+    let dChannel = D.Channels.findOne(dChannelId);
+    let customer = Users.findOneCustomer(dChannel.customerId);
+
+    let messageData = this._respondedMessage(customer);
+    this._postMessage(messageData);
+  },
+
+  _respondedMessage(customer) {
+    let clientName = customer.displayName();
+    let message = `Gotcha - ${clientName}`;
+    return {
+      channel: this._notifyChannel.id,
+      text: message,
+      username: clientName,
+      icon_emoji: ':smirk:'
+    }
+  },
+
   _globalNotifyMessage(customer) {
     let hash = this._globalHash();
     let clientName = customer.displayName();
