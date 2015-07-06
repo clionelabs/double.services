@@ -66,5 +66,9 @@ NotificationService.AlertPoliciesExecutor = {
       console.log("[NotificationService.AlertPolicyExecutor] cancel schedule: ", JSON.stringify(schedule));
       Meteor.clearTimeout(self._timeoutHandlers[alertPolicy._id][index]);
     });
+
+    self._slackClient.sendResponded({
+      dChannelId: alertPolicy.channelId
+    });
   }
 }
