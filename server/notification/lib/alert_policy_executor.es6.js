@@ -62,16 +62,21 @@ NotificationService.AlertPoliciesExecutor = {
    */
   _endAlertPolicy(alertPolicy) {
     let self = this;
+    let hasAlerted = false;
     _.each(alertPolicy.schedules, function(schedule, index) {
+      let delay = moment(schedule.notifyAt).diff(moment().valueOf(), 'ms');
+      if (delay < 0) {
+        hasAlerted = true;
+      }
+
       console.log("[NotificationService.AlertPolicyExecutor] cancel schedule: ", JSON.stringify(schedule));
       Meteor.clearTimeout(self._timeoutHandlers[alertPolicy._id][index]);
     });
 
-    //TODO: only send responded notification if at least one alert has been sent before
-    /*
-    self._slackClient.sendResponded({
-      dChannelId: alertPolicy.channelId
-    });
-    */
+    if (hasAlerted) {
+      self._slackClient.sendResponded({
+        dChannelId: alertPolicy.channelId
+      });
+    }
   }
 }
