@@ -10,6 +10,8 @@ SlackService.TeamClient = {
 
   _updatingChannels: {},
 
+  _assistantName: 'david',
+
   /*
    * Initialize and start slack RTC client, given the authToken
    * @param {String} authToken
@@ -171,11 +173,34 @@ SlackService.TeamClient = {
         console.log("[SlackService.TeamClient] inserting messages: ", result.messages.length);
         self._removeOutingDelieveredMessages(dChannel);
         _.each(result.messages, function(message) {
+          if (self._shouldUnspamChannel(message)) {
+            self._unspamChannel(dChannel._id);
+          }
           self._insertMessage(message, dChannel._id);
         });
       }
       self._updatingChannels[channel.id] = false;
     }));
+  },
+
+  /**
+   * @params {Object} message Slack message object
+   * A channel should be unspammed if it contains @double or David
+   */
+  _shouldUnspamChannel(message) {
+    let text = message.text;
+    let myId = this.client.self.id;
+    let isAtMe = text.indexOf(`<@${myId}`) !== -1;
+    let isDavid = text.toLowerCase().indexOf(this._assistantName) !== -1;
+    return isAtMe || isDavid;
+  },
+
+  /**
+   * @param {String} channelId Id of DChannel
+   * Unspam a channel
+   */
+  _unspamChannel(dChannelId) {
+    D.Channels.update(dChannelId, {$set: {isSpam: false}});
   },
 
   /**
