@@ -213,6 +213,9 @@ SlackService.TeamClient = {
   /**
    * Decode slack message content
    * <@Uxxxxxxxx> -> @username
+   * <http:xxx> -> xxx
+   *
+   * Ref: https://api.slack.com/docs/formatting
    *
    * @params {String} text
    */
@@ -221,6 +224,14 @@ SlackService.TeamClient = {
     let decodedText = text.replace(/<@(U.*?)>/g, function(match, p1) {
       let user = self.client.users[p1];
       return user? `@${user.name}`: match;
+    });
+    decodedText = decodedText.replace(/<(http.*?)>/g, function(match, p1) {
+      let index = p1.indexOf("|");
+      if (index === -1) {
+        return p1;
+      } else {
+        return p1.substring(0, index);
+      }
     });
     return decodedText;
   },
