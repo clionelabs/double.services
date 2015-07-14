@@ -237,6 +237,27 @@ SlackService.TeamClient = {
   },
 
   /**
+   * Encode sack message content
+   * @username -> <@Uxxxx|username>
+   *
+   * Ref: https://api.slack.com/docs/formatting
+   * @params {String} text
+   */
+  _encodeMessageText: function(text) {
+    let self = this;
+    let encodedText = text.replace(/@(\S*)/g, function(match, p1) {
+      let ret = match;
+      _.each(self.client.users, function(user) {
+        if (user.name === p1) {
+          ret = `<@${user.id}>`
+        }
+      });
+      return ret;
+    });
+    return encodedText;
+  },
+
+  /**
    * Asynchronously call slack api and fetch all the messages for a particular channel.
    * @params {Object} channel Slack channel object
    * @params {String} oldestTS Only fetch messages after timestamp (slack format)
@@ -308,7 +329,8 @@ SlackService.TeamClient = {
 
     console.log("[SlackService.TeamClient] ", self.client.team.name, "sending out message: ", JSON.stringify(dMessage));
 
-    let result = channel.send(dMessage.content);
+    let content = self._encodeMessageText(dMessage.content);
+    let result = channel.send(content);
     let sentMessageId = result.id;
     self._sentMessageIds[sentMessageId] = dMessage._id;
   },
