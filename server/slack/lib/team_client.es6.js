@@ -20,6 +20,7 @@ SlackService.TeamClient = {
     self.client.on('open', Meteor.bindEnvironment(() => {self._clientOnOpen()}));
     self.client.on('message', Meteor.bindEnvironment((message) => {self._clientOnMessage(message)}));
     self.client.on('messageSent', Meteor.bindEnvironment((message) => {self._clientOnMessageSent(message)}));
+    self.client.on('presenceChange', Meteor.bindEnvironment((user, presence) => {self._clientOnPresenceChange(user, presence)}));
     self.client.on('error', Meteor.bindEnvironment(() => {self._clientOnError()}));
     self.client.login();
   },
@@ -30,6 +31,7 @@ SlackService.TeamClient = {
   _clientOnOpen() {
     console.log('[SlackService.TeamClient] clientOnOpen: ', this.client.team.name);
     this._updateAllChannels();
+    this._updateAllChannelMembers();
     this._observingOutingMessages();
   },
 
@@ -41,6 +43,19 @@ SlackService.TeamClient = {
     let self = this;
     let channel = self.client.getChannelGroupOrDMByID(message.channel);
     self._updateChannel(channel);
+  },
+
+  /**
+   * Callback when RTC client received presence_change
+   */
+  _clientOnPresenceChange(user, presence) {
+    console.log('[SlackService.TeamClient] clientOnPresenceChange: ', this.client.team.name, user.id, presence);
+    let self = this;
+    _.each(self._allChannelsDMsAndGroups(), function(channel) {
+      if (_.indexOf(self._channelMembers(channel), user.id) !== -1) {
+        self._updateChannelMembers(channel);
+      }
+    });
   },
 
   /**
@@ -129,6 +144,20 @@ SlackService.TeamClient = {
     });
   },
 
+  _allChannelsDMsAndGroups() {
+    let self = this;
+    let all = [].concat(_.values(self.client.channels), _.values(self.client.dms), _.values(self.client.groups));
+    return all;
+  },
+
+  _channelMembers(channel) {
+    if (channel.is_group || channel.is_channel) {
+      return channel.members;
+    } else if (channel.is_im) {
+      return [channel.user];
+    }
+  },
+
   _shouldIgnore(channel) {
     let ignoreChannelNames = null;
     if (Meteor.settings.slackService && Meteor.settings.slackService.ignoreChannelNames) {
@@ -137,8 +166,37 @@ SlackService.TeamClient = {
     if (!ignoreChannelNames) {
       return false;
     }
-
     return _.indexOf(ignoreChannelNames, channel.name) !== -1;
+  },
+
+  /**
+   * Update user presence for all users, all channels
+   */
+  _updateAllChannelMembers() {
+    let self = this;
+    let all = [_.values(self.client.channels), _.values(self.client.dms), _.values(self.client.groups)];
+    _.each(self._allChannelsDMsAndGroups(), function(channel) {
+      self._updateChannelMembers(channel);
+    });
+  },
+
+  /**
+   * Update presences of all members of a particular channel
+   * @params {Objecg} user Slack user object
+   */
+  _updateChannelMembers(channel) {
+    console.log("[SlackService.TeamClient] updateChannelMembers for channel", channel.name);
+    let self = this;
+    let dChannel = self._dChannel(channel);
+    if (!dChannel) return; // not supposed to happen
+    let members = _.map(self._channelMembers(channel), function(userId) {
+      let user = self.client.getUserByID(userId);
+      return {
+        name: user.name,
+        presence: user.presence
+      }
+    });
+    D.Channels.update(dChannel._id, {$set: {'extra.members': members}});
   },
 
   /**
