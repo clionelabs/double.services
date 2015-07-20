@@ -152,7 +152,7 @@ SlackService.TeamClient = {
 
   _channelMembers(channel) {
     if (channel.is_group || channel.is_channel) {
-      return channel.members;
+      return _.without(channel.members, this.client.self.id);
     } else if (channel.is_im) {
       return [channel.user];
     }
