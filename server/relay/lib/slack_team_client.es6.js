@@ -27,11 +27,18 @@ RelayService.SlackTeamClient = {
   relayMessage(message) {
     let self = this;
 
+    let channel = D.Channels.findOne(message.channelId);
+    let channelName = '';
+    if (channel.category === D.Channels.Categories.SLACK) {
+      channelName = `[${channel.extra.channel.id.charAt(0)}]${channel.extra.channel.name}`;
+    }
+
     let icon_emoji = message.inOut === D.Messages.InOut.OUT? ':troll:': ':alien:';
+    let userName = `${message.userName} - ${channelName}`;
     let messageData = {
       channel: self._relayChannel.id,
       text: message.content,
-      username: message.userName,
+      username: userName,
       icon_emoji: icon_emoji
     };
     self._postMessage(messageData);
