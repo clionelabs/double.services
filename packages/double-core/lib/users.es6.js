@@ -36,22 +36,26 @@ D.Users = {
   },
 
   findAssistants(selector={}, options={}) {
-    _.extend(selector, { roles: { $in: [this.Roles.ASSISTANT]}} );
+    if (typeof selector === 'string' || selector instanceof String) selector = { _id : selector };
+    selector = _.extend({}, selector, { roles: { $in: [this.Roles.ASSISTANT]}} );
     return this.find(selector, options);
   },
 
   findCustomers(selector={}, options={}) {
-    _.extend(selector, { roles: { $in: [this.Roles.CUSTOMER]}} );
+    if (typeof selector === 'string' || selector instanceof String) selector = { _id : selector };
+    selector = _.extend({}, selector, { roles: { $in: [this.Roles.CUSTOMER]}} );
     return this.find(selector, options);
   },
 
   findOneAssistant(selector={}, options={}) {
-    _.extend(selector, { roles: { $in: [this.Roles.ASSISTANT]}} );
+    if (typeof selector === 'string' || selector instanceof String) selector = { _id : selector };
+    selector = _.extend({}, selector, { roles: { $in: [this.Roles.ASSISTANT]}} );
     return this.findOne(selector, options);
   },
 
   findOneCustomer(selector={}, options={}) {
-    _.extend(selector, { roles: { $in: [this.Roles.CUSTOMER]}} );
+    if (typeof selector === 'string' || selector instanceof String) selector = { _id : selector };
+    selector = _.extend({}, selector, { roles: { $in: [this.Roles.CUSTOMER]}} );
     return this.findOne(selector, options);
   },
 
