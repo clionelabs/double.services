@@ -17,12 +17,26 @@ _.extend(NotificationService.AlertPolicies, {
     GLOBAL: 'Global'
   },
 
+  isAssistantOnline(channel) {
+    let customerId = channel.customerId;
+    let customer = Users.findOneCustomer(customerId);
+    let assistant = customer.assistant();
+    if (assistant && assistant.status && assistant.status.online) {
+      return true;
+    }
+    return false;
+  },
+
   createForChannelIfNotExists(channel) {
     let self = this;
     let policy = NotificationService.AlertPolicies.findOne({channelId: channel._id});
     if (!!policy) return;
 
-    let delayIndividual = Meteor.settings.notificationService.alertDelayInSecs.individual;
+    let isAssistantOnline = self.isAssistantOnline(channel);
+
+    let delayIndividual = isAssistantOnline?
+      Meteor.settings.notificationService.alertDelayInSecs.individual:
+      Meteor.settings.notificationService.alertDelayInSecs.individualOffline;
     let delayGlobal = Meteor.settings.notificationService.alertDelayInSecs.global;
 
     let doc = {

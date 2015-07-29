@@ -20,7 +20,8 @@
       "channelName": "CHANNEL_NAME_FOR_RECEIVING_NOTIFICATION"
     },
     "alertDelayInSecs": {
-      "individual": 60,
+      "individualOffline": 5,
+      "individual": 120,
       "global": 10 * 60
     }
   },
