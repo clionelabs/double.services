@@ -255,7 +255,8 @@ SlackService.TeamClient = {
       let userName = userId? self.client.users[userId].name: '=UNKNOWN=';
       let inOut = selfUserId === userId? D.Messages.InOut.OUT: D.Messages.InOut.IN;
       let decodedText = self._decodeMessageText(message.text);
-      let timestamp = moment.unix(message.ts).valueOf();
+      let timestamp = message.ts * 1000;
+
       let options = {
         channelId: dChannelId,
         content: decodedText,
@@ -361,7 +362,7 @@ SlackService.TeamClient = {
     if (self._observeHandler) {
       self._observeHandler.stop();
     }
-    self._observeHandler = D.Messages.find({inOut: D.Messages.InOut.OUTING}).observe({
+    self._observeHandler = D.Messages.find({inOut: D.Messages.InOut.OUTING}, {sort: {timestamp: 1}}).observe({
       teamClient: self,
       added: function(message) {
         this.teamClient._handleOutingMessage(message);
