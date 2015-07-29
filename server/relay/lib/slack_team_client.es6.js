@@ -30,7 +30,7 @@ RelayService.SlackTeamClient = {
     let channel = D.Channels.findOne(message.channelId);
     let channelName = '';
     if (channel.category === D.Channels.Categories.SLACK) {
-      channelName = `[${channel.extra.channel.id.charAt(0)}]${channel.extra.channel.name}`;
+      channelName = `${channel.extra.channel.name} [${channel.extra.channel.id.charAt(0)}]`;
     }
 
     let icon_emoji = message.inOut === D.Messages.InOut.OUT? ':troll:': ':alien:';
