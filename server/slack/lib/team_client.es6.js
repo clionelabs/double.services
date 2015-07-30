@@ -273,6 +273,7 @@ SlackService.TeamClient = {
    * Decode slack message content
    * <@Uxxxxxxxx> -> @username
    * <http:xxx> -> xxx
+   * <mailto:xxx> ->xxx
    *
    * Ref: https://api.slack.com/docs/formatting
    *
@@ -289,7 +290,15 @@ SlackService.TeamClient = {
       if (index === -1) {
         return p1;
       } else {
-        return p1.substring(0, index);
+        return p1.substring(index+1);
+      }
+    });
+    decodedText = decodedText.replace(/<(mailto.*?)>/g, function(match, p1) {
+      let index = p1.indexOf("|");
+      if (index === -1) { // not supposed to happen
+        return p1;
+      } else {
+        return p1.substring(index+1);
       }
     });
     return decodedText;
