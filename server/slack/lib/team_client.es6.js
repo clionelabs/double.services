@@ -62,15 +62,21 @@ SlackService.TeamClient = {
    * Callback when RTC client received messageSent
    */
   _clientOnMessageSent(message) {
-    console.log('[SlackService.TeamClient] clientOnMessageSent: ', this.client.team.name);
     let self = this;
+    let channel = self.client.getChannelGroupOrDMByID(message.channel);
+    console.log('[SlackService.TeamClient] clientOnMessageSent: ', this.client.team.name, channel.name);
+
     let dMessageId = self._sentMessageIds[message.id];
     if (dMessageId) {
       // Set it as OUTING_DELIEVERED, and remove them later when we done fetching history
       D.Messages.update(dMessageId, {$set: {inOut: D.Messages.InOut.OUTING_DELIVERED}});
     }
-    let channel = self.client.getChannelGroupOrDMByID(message.channel);
-    self._updateChannel(channel);
+
+    // Sometimes, it fails to fetch in the newly sent messages.
+    //   i.e. `channel.history` slack API call didn't return the newly sent messages.
+    //   It might due to a small delay between the rtc onMessageSent callback and the message insertion on the slack side
+    // so we do 2 extra retries here if no new messages are found (we are expecting at least one)
+    self._updateChannel(channel, 2);
   },
 
   /**
@@ -207,15 +213,16 @@ SlackService.TeamClient = {
    *     To ensure only fetching unfetched messages, an lastMessageTS property is attached
    *     to D.Channel to indicate the timestmap of the last fetched message.
    * @params {Object} channel Slack channel object
+   * @params {Integer} numberOfRetriesIfNoMessages
    * .
    */
-  _updateChannel(channel) {
+  _updateChannel(channel, numberOfRetriesIfNoMessages = 0) {
     if (this._shouldIgnore(channel)) return;
 
-    console.log("[SlackService.TeamClient] updating channel: ", channel.name);
+    console.log("[SlackService.TeamClient] updating channel: ", channel.name, ", retries: ", numberOfRetriesIfNoMessages);
     let self = this;
     if (self._updatingChannels[channel.id]) {
-      console.log("[SlackService.TeamClient] already updating. Return");
+      console.log("[SlackService.TeamClient] already updating: ", channel.name, ". Return");
       return;
     }
 
@@ -224,13 +231,19 @@ SlackService.TeamClient = {
     let dChannel = self._upsertDChannel(channel);
     self._fetchChannelHistory(channel, dChannel.extra.lastMessageTS, Meteor.bindEnvironment(function(result) {
       if (!result.ok) {
-        console.log("[SlackService.TeamClient] fetch failed: ", result);
+        console.log("[SlackService.TeamClient] fetch ", channel.name, " failed: ", result);
       } else {
-        console.log("[SlackService.TeamClient] inserting messages: ", result.messages.length);
+        console.log("[SlackService.TeamClient] inserting ", channel.name, " messages: ", result.messages.length);
         self._removeOutingDelieveredMessages(dChannel);
         _.each(result.messages, function(message) {
           self._insertMessage(message, dChannel._id);
         });
+
+        if (result.messages.length === 0 && numberOfRetriesIfNoMessages > 0) {
+          Meteor.setTimeout(function() {
+            self._updateChannel(channel, numberOfRetriesIfNoMessages - 1);
+          }, 1000);
+        }
       }
       self._updatingChannels[channel.id] = false;
     }));
