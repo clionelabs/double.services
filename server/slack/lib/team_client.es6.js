@@ -267,7 +267,7 @@ SlackService.TeamClient = {
       let userId = message.user;
       let userName = userId? self.client.users[userId].name: '=UNKNOWN=';
       let inOut = selfUserId === userId? D.Messages.InOut.OUT: D.Messages.InOut.IN;
-      let decodedText = self._decodeMessageText(message.text);
+      let decodedText = self._decodeMessageText(message);
       let timestamp = message.ts * 1000;
 
       let options = {
@@ -286,16 +286,26 @@ SlackService.TeamClient = {
    * Decode slack message content
    * <@Uxxxxxxxx> -> @username
    * <http:xxx> -> xxx
+   *   uploaded file, i.e. photo-xxxxxxxx.xxx -> downloadable public url
    * <mailto:xxx> ->xxx
    *
    * Ref: https://api.slack.com/docs/formatting
    *
-   * @params {String} text
+   * @params {Object} message Slack message object
    */
-  _decodeMessageText: function(text) {
+  _decodeMessageText: function(message) {
+    let text = message.text;
+    let file = message.file;
     let self = this;
     let decodedText = text.replace(/<@(U.*?)>/g, function(match, p1) {
-      let user = self.client.users[p1];
+      let index = p1.indexOf("|");
+      let userId;
+      if (index === -1) {
+        userId = p1;
+      } else {
+        userId = p1.substring(0, index);
+      }
+      let user = self.client.users[userId];
       return user? `@${user.name}`: match;
     });
     decodedText = decodedText.replace(/<(http.*?)>/g, function(match, p1) {
@@ -303,6 +313,12 @@ SlackService.TeamClient = {
       if (index === -1) {
         return p1;
       } else {
+        let content = p1.substring(index+1);
+
+        // if the content is an uploaded file, then return a downloadable url
+        if (file && file.name && file.name === content) {
+          return file.permalink_public;
+        }
         return p1.substring(index+1);
       }
     });
