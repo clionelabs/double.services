@@ -5,6 +5,8 @@
 NotificationService.AlertPoliciesExecutor = {
   _slackClient: null,
 
+  _observeHandler: null,
+
   _timeoutHandlers: {},
 
   startup() {
@@ -12,7 +14,11 @@ NotificationService.AlertPoliciesExecutor = {
 
     self._connectSlackClient(function() {
       console.log("[NotificationService.AlertPoliciesExecutor] slack connected");
-      NotificationService.AlertPolicies.find({}).observe({
+
+      if (self._observeHandler) {
+        self._observeHandler.stop();
+      }
+      self._observeHandler = NotificationService.AlertPolicies.find({}).observe({
         executor: self,
         added(doc) {
           console.log("[NotificationService.AlertPoliciesExecutor] new policy: ", doc);
