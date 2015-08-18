@@ -278,7 +278,17 @@ SlackService.TeamClient = {
         timestamp: timestamp
       }
       D.Messages.insert(options);
-      D.Channels.update(dChannelId, {$max: {'extra.lastMessageTS': message.ts}});
+
+      let channelOptions = {
+        $set: {
+          lastMessage: {
+            inOut: inOut,
+            timestamp: timestamp
+          }
+        },
+        $max: {'extra.lastMessageTS': message.ts}
+      }
+      D.Channels.update(dChannelId, channelOptions);
     }
   },
 
