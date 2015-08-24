@@ -326,7 +326,7 @@ SlackService.TeamClient = {
         let content = p1.substring(index+1);
 
         // if the content is an uploaded file, then return a downloadable url
-        if (file && file.name && file.name === content) {
+        if (file && file.title && file.title === content) {
           return file.permalink_public;
         }
         return p1.substring(index+1);
