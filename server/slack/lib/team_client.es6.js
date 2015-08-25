@@ -21,7 +21,7 @@ SlackService.TeamClient = {
     self.client.on('message', Meteor.bindEnvironment((message) => {self._clientOnMessage(message)}));
     self.client.on('messageSent', Meteor.bindEnvironment((message) => {self._clientOnMessageSent(message)}));
     self.client.on('presenceChange', Meteor.bindEnvironment((user, presence) => {self._clientOnPresenceChange(user, presence)}));
-    self.client.on('error', Meteor.bindEnvironment(() => {self._clientOnError()}));
+    self.client.on('error', Meteor.bindEnvironment((error) => {self._clientOnError(error)}));
     self.client.login();
   },
 
@@ -83,7 +83,7 @@ SlackService.TeamClient = {
    * Callback when RTC client received error
    */
   _clientOnError(error) {
-    console.log('[SlackService.TeamClient] clientOnError: ', error);
+    console.log('[SlackService.TeamClient] clientOnError: ', error, this.client.team.name);
   },
 
   /**
