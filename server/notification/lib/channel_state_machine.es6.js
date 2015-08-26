@@ -33,6 +33,7 @@ NotificationService.ChannelStateMachine = function(channel) {
         let channel = this;
         if (from === 'none') return;
         console.log("onenterpending: ", channel.extra.channel.name, event, from, to);
+        NotificationService.Autoresponder.onChannelPending(channel);
         NotificationService.AlertPolicies.createForChannelIfNotExists(channel);
       },
       onenterreplied: function(event, from, to) {
