@@ -64,7 +64,7 @@ SlackService.TeamClient = {
   _clientOnMessageSent(message) {
     let self = this;
     let channel = self.client.getChannelGroupOrDMByID(message.channel);
-    console.log('[SlackService.TeamClient] clientOnMessageSent: ', this.client.team.name, channel.name);
+    console.log('[SlackService.TeamClient] clientOnMessageSent: ', this.client.team.name, channel.name, self._sentMessageIds[message.id]);
 
     let dMessageId = self._sentMessageIds[message.id];
     if (dMessageId) {
@@ -263,10 +263,14 @@ SlackService.TeamClient = {
   _insertMessage(message, dChannelId) {
     let self = this;
     if (message.type === 'message') {
+      let autoReplyContent = D.Configs.get(D.Configs.Keys.AUTO_RESPONSE_MESSAGE);
+
       let selfUserId = this.client.self.id;
       let userId = message.user;
       let userName = userId? self.client.users[userId].name: '=UNKNOWN=';
       let inOut = selfUserId === userId? D.Messages.InOut.OUT: D.Messages.InOut.IN;
+      let isAutoReply = message.text === autoReplyContent;
+
       let decodedText = self._decodeMessageText(message);
       let timestamp = message.ts * 1000;
 
@@ -274,6 +278,7 @@ SlackService.TeamClient = {
         channelId: dChannelId,
         content: decodedText,
         inOut: inOut,
+        isAutoReply: isAutoReply,
         userName: userName,
         timestamp: timestamp
       }

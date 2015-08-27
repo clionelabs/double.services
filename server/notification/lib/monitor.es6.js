@@ -27,7 +27,10 @@ NotificationService.Monitor = {
           if (message.inOut === D.Messages.InOut.IN) {
             channel.inbound();
           } else if (message.inOut === D.Messages.InOut.OUT) {
-            channel.outbound();
+            // Ignore out-of-office auto-reply message
+            if (!message.isAutoReply) {
+              channel.outbound();
+            }
           }
         }
         D.Messages.update(message._id, {$set: {'notification.processed': true}});
