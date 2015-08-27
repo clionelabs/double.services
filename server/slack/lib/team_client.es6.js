@@ -288,6 +288,7 @@ SlackService.TeamClient = {
         $set: {
           lastMessage: {
             inOut: inOut,
+            isAutoReply: isAutoReply,
             timestamp: timestamp
           }
         },
