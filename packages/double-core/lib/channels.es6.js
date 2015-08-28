@@ -46,7 +46,10 @@ D.Channel = {
     return this.lastMessage? this.lastMessage.timestamp: 0;
   },
   isNotReplied() {
-    return this.lastMessage && this.lastMessage.inOut === D.Messages.InOut.IN;
+    let lastMessage = this.lastMessage;
+    if (!lastMessage) return false;
+    let isReplied = lastMessage.inOut === D.Messages.InOut.OUT && !lastMessage.isAutoReply;
+    return !isReplied;
   },
   isOnline() {
     let isChannelOnline = false;
