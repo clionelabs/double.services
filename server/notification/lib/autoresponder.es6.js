@@ -26,9 +26,6 @@ NotificationService.Autoresponder = {
     let currentDate = current.format("YYYY-MM-DD");
     let currentDayOfWeek = current.day();
 
-    console.log("business configs: ", businessTimezoneOffset, businessStart, businessEnd, businessHolidays);
-    console.log("current: ", current, secondsOfTheDay, currentDate, currentDayOfWeek);
-
     // hardcoded Sunday and Saturday are holidays
     if (currentDayOfWeek === 0 || currentDayOfWeek === 6) return false;
     if (secondsOfTheDay < businessStart || secondsOfTheDay > businessEnd) return false;
