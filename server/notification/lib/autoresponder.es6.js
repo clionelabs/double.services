@@ -1,19 +1,40 @@
 NotificationService.Autoresponder = {
   onChannelPending(channel) {
     let isAutoResponseOn = D.Configs.get(D.Configs.Keys.IS_AUTO_RESPONSE_ON);
+    if (!isAutoResponseOn) return;
+    if (this._isInBusinessHour()) return;
+    this._send(channel);
+  },
+
+  _isInBusinessHour() {
+    let businessTimezoneOffset = D.Configs.get(D.Configs.Keys.BUSINESS_TIMEZONE_OFFSET_IN_MINS);
     let businessStart = D.Configs.get(D.Configs.Keys.BUSINESS_START_TIME_IN_SECS);
     let businessEnd = D.Configs.get(D.Configs.Keys.BUSINESS_END_TIME_IN_SECS);
+    let businessHolidays = D.Configs.get(D.Configs.Keys.BUSINESS_HOLIDAYS) || [];
 
-    let current = moment().utcOffset(480); // hardcoded HKT timezone +8 (=60 * 8)
-    let secondsOfTheDay = current.hours() * 3600 + current.minutes() * 60 + current.seconds();
-    let isOutBusiness = false;
-    if (businessStart && businessEnd) {
-      isOutBusiness = secondsOfTheDay < businessStart || secondsOfTheDay > businessEnd;
+    // if any of these are not set, then assume it's always in business
+    if (!businessTimezoneOffset || !businessStart || !businessEnd) {
+      return true;
     }
 
-    if (!isOutBusiness) return;
-    if (!isAutoResponseOn) return;
-    this._send(channel);
+    businessTimezoneOffset = parseInt(businessTimezoneOffset);
+    businessStart = parseInt(businessStart);
+    businessEnd = parseInt(businessEnd);
+
+    let current = moment().utcOffset(businessTimezoneOffset);
+    let secondsOfTheDay = current.hours() * 3600 + current.minutes() * 60 + current.seconds();
+    let currentDate = current.format("YYYY-MM-DD");
+    let currentDayOfWeek = current.day();
+
+    // hardcoded Sunday and Saturday are holidays
+    if (currentDayOfWeek === 0 || currentDayOfWeek === 6) return false;
+    if (secondsOfTheDay < businessStart || secondsOfTheDay > businessEnd) return false;
+    let isHoliday = _.reduce(businessHolidays, function(memo, holiday) {
+      return memo | holiday.date === currentDate;
+    }, false);
+    if (isHoliday) return false;
+
+    return true;
   },
 
   _send(channel) {
