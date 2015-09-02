@@ -42,7 +42,10 @@ SlackService.TeamClient = {
     console.log('[SlackService.TeamClient] clientOnMessage: ', this.client.team.name);
     let self = this;
     let channel = self.client.getChannelGroupOrDMByID(message.channel);
-    self._updateChannel(channel);
+    // sometimes, it fails to fetch in the new messages because rtm api is faster than the web api
+    //   i.e.  rtc indicates there is a new message, but calling channels.history api returns nothing
+    // so we do 2 extra retries if no new messages are found (we are expecting at least one)
+    self._updateChannel(channel, 2);
   },
 
   /**
@@ -219,7 +222,7 @@ SlackService.TeamClient = {
   _updateChannel(channel, numberOfRetriesIfNoMessages = 0) {
     if (this._shouldIgnore(channel)) return;
 
-    console.log("[SlackService.TeamClient] updating channel: ", channel.name, ", retries: ", numberOfRetriesIfNoMessages);
+    console.log("[SlackService.TeamClient] updating channel: ", channel.name, ", retries if none: ", numberOfRetriesIfNoMessages);
     let self = this;
     if (self._updatingChannels[channel.id]) {
       console.log("[SlackService.TeamClient] already updating: ", channel.name, ". Return");
