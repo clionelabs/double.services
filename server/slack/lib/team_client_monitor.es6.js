@@ -106,7 +106,11 @@ SlackService.TeamClientMonitor = {
         if (lastMessage) {
           return lastMessage.ts === dChannel.extra.lastMessageTS;
         } else {
-          return dChannel.extra.lastMessageTS === 0;
+          // Other than being the channels are really empty, it could also be possible
+          // that sometimes all the messages could be cleared by slack (maybe exceeding limits?)
+          // In this case, it will not agree with what we already fetched
+          // Here, if there is no lastMessage, we just assume it's being correct
+          return true;
         }
       } else {
       }
