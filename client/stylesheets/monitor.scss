@@ -1,0 +1,15 @@
+#monitor-main-container {
+  .status {
+    color: red;
+
+    &.good {
+      color: green;
+    }
+  }
+
+  .date {
+    color: grey;
+    font-size: 10px;
+  }
+}
+
