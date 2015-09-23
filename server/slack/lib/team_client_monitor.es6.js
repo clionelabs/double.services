@@ -3,6 +3,7 @@ SlackService.TeamClientMonitor = {
   API_ENDPOINT: 'https://slack.com/api/',
   CHECK_PONG_INTERVAL: 30 * 1000, // every 30 seconds
   CHECK_MESSAGES_INTERVAL: 15 * 60 * 1000, // every 15 mins
+  SHOULD_RECONNECT_SECONDS: 30,
 
   _team: null,
   _slackClient: null,
@@ -20,6 +21,7 @@ SlackService.TeamClientMonitor = {
     self._updateWSStatus();
     Meteor.setInterval(function() {
       self._updateWSStatus();
+      self._checkShouldTriggerReconnect();
     }, self.CHECK_PONG_INTERVAL);
   },
 
@@ -46,6 +48,28 @@ SlackService.TeamClientMonitor = {
     let lastPong = moment(self._slackClient.client._lastPong).format();
     return {
       lastPong: lastPong
+    }
+  },
+
+  /**
+   * Sometimes, the websocket are closed for no apparent reasons:
+   *   Ref issue: https://github.com/slackhq/node-slack-client/issues/53
+   *
+   * If it does, we should trigger a reconnection.
+   *   Hopefully, it will be handled internally with the slack library later:
+   *     Ref: https://github.com/slackhq/node-slack-client/pull/66/files
+   */
+  _checkShouldTriggerReconnect() {
+    let self = this;
+    let slackTeam = SlackService.Teams.findOne(self._team._id);
+
+    let shouldReconnect = moment().diff(moment(slackTeam.monitoring.wsStatus.lastPong), 's')
+      > self.SHOULD_RECONNECT_SECONDS;
+
+    if (shouldReconnect) {
+      console.log("[SlackService.TeamClientMonitor] reconnect a slack client: ", self._slackClient.client.team.name);
+      self._slackClient.disconnect();
+      self._slackClient.connect();
     }
   },
 

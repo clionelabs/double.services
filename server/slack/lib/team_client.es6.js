@@ -4,6 +4,10 @@ SlackService.TeamClient = {
 
   client: null,
 
+  _teamName: null,
+
+  _authToken: null,
+
   _sentMessageIds: {},
 
   _observeHandler: null,
@@ -16,6 +20,13 @@ SlackService.TeamClient = {
    */
   init(authToken) {
     let self = this;
+    self._authToken = authToken;
+    self.connect();
+  },
+
+  connect() {
+    let self = this;
+    let authToken = self._authToken;
     self.client = new Slack(authToken, true, true); // autoReconnect = true, autoMark = true
     self.client.on('open', Meteor.bindEnvironment(() => {self._clientOnOpen()}));
     self.client.on('close', Meteor.bindEnvironment(() => {self._clientOnClose()}));
@@ -26,11 +37,17 @@ SlackService.TeamClient = {
     self.client.login();
   },
 
+  disconnect() {
+    let self = this;
+    self.client.disconnect();
+  },
+
   /**
    * Callback when RTC client is connected
    */
   _clientOnOpen() {
     console.log('[SlackService.TeamClient] clientOnOpen: ', this.client.team.name);
+    this._teamName = this.client.team.name;
     this._updateAllChannels();
     this._updateAllChannelMembers();
     this._observingOutingMessages();
@@ -40,7 +57,7 @@ SlackService.TeamClient = {
    * Callback when RTC client is closed
    */
   _clientOnClose() {
-    console.log('[SlackService.TeamClient] clientOnClose: ', this.client.team.name);
+    console.log('[SlackService.TeamClient] clientOnClose: ', this._teamName);
   },
 
   /**
