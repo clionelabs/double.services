@@ -3,7 +3,7 @@ SlackService.TeamClientMonitor = {
   API_ENDPOINT: 'https://slack.com/api/',
   CHECK_PONG_INTERVAL: 30 * 1000, // every 30 seconds
   CHECK_MESSAGES_INTERVAL: 15 * 60 * 1000, // every 15 mins
-  SHOULD_RECONNECT_SECONDS: 30,
+  SHOULD_RECONNECT_SECONDS: 60,
 
   _team: null,
   _slackClient: null,

@@ -111,7 +111,7 @@ SlackService.TeamClient = {
    * Callback when RTC client received error
    */
   _clientOnError(error) {
-    console.log('[SlackService.TeamClient] clientOnError: ', error, this.client.team.name);
+    console.log('[SlackService.TeamClient] clientOnError: ', error, this._teamName);
   },
 
   /**
