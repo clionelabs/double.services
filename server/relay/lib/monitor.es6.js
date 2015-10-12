@@ -1,30 +1,33 @@
 RelayService.Monitor = {
-  _slackClient: null,
   _observeHandler: null,
 
   startMonitoring() {
-    let self = this;
-    self._connectSlackClient(function() {
-      console.log("[RelayService.Monitor] slack connected");
-      self._startProcessingMessages();
-    });
+    this._startProcessingMessages();
   },
 
   /*
    * @param {D.Message} message
    */
   relayMessage(message) {
-    this._slackClient.relayMessage(message);
-  },
+    let self = this;
 
-  /**
-   * Connect slack client to send notification to
-   */
-  _connectSlackClient(callback) {
-    let token = Meteor.settings.relayService.slack.token;
-    let channelName = Meteor.settings.relayService.slack.channelName;
-    this._slackClient = _.extend({}, RelayService.SlackTeamClient);
-    this._slackClient.init(token, channelName, callback);
+    let relayChannelName = Meteor.settings.relayService.slack.channelName;
+
+    let channel = D.Channels.findOne(message.channelId);
+    let channelName = '';
+    if (channel.category === D.Channels.Categories.SLACK) {
+      channelName = `${channel.extra.channel.name} [${channel.extra.channel.id.charAt(0)}]`;
+    }
+
+    let icon_emoji = message.inOut === D.Messages.InOut.OUT? ':troll:': ':alien:';
+    let userName = `${message.userName} - ${channelName}`;
+    let options = {
+      text: message.content,
+      username: userName,
+      icon_emoji: icon_emoji
+    };
+
+    SlackLog.log(relayChannelName, options);
   },
 
   _startProcessingMessages() {
