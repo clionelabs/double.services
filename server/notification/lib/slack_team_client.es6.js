@@ -1,25 +1,5 @@
 // API client for a slack team
 NotificationService.SlackTeamClient = {
-  client: null,
-
-  _notifyChannelName: null,
-  _notifyChannel: null,
-
-  _initCallback: null,
-
-  /*
-   * Initialize and start slack RTC client, given the authToken
-   * @param {String} authToken
-   */
-  init(authToken, notifyChannelName, callback) {
-    let self = this;
-    self._notifyChannelName = notifyChannelName;
-    self.client = new Slack(authToken, true, true); // autoReconnect = true, autoMark = true
-    self.client.on('open', Meteor.bindEnvironment(() => {self._clientOnOpen()}));
-    self.client.on('error', Meteor.bindEnvironment((error) => {self._clientOnError(error)}));
-    self.client.login();
-    self._initCallback = callback;
-  },
 
   /**
    * Send notification message to slack
@@ -52,7 +32,7 @@ NotificationService.SlackTeamClient = {
     let clientName = customer.displayName();
     let message = `Gotcha - ${clientName}`;
     return {
-      channel: this._notifyChannel.id,
+      // channel: this._notifyChannel.id,
       text: message,
       username: clientName,
       icon_emoji: ':smirk:'
@@ -65,7 +45,7 @@ NotificationService.SlackTeamClient = {
     let message = `${hash}: I am ${clientName}. I am still waiting~~`;
 
     return {
-      channel: this._notifyChannel.id,
+      // channel: this._notifyChannel.id,
       text: message,
       username: clientName,
       icon_emoji: ':sob:'
@@ -78,7 +58,7 @@ NotificationService.SlackTeamClient = {
     let message = `Hey ${hash}, I am ${clientName}. I am waiting for your reply~~`;
 
     return {
-      channel: this._notifyChannel.id,
+      // channel: this._notifyChannel.id,
       text: message,
       username: clientName,
       icon_emoji: ':kissing_heart:'
@@ -96,39 +76,19 @@ NotificationService.SlackTeamClient = {
     return `<@${slackUser.slackId}|${slackUser.slackName}>`;
   },
 
-  /**
-   * Callback when RTC client is connected
-   */
-  _clientOnOpen() {
-    console.log('[NotificationService.TeamClient] clientOnOpen: ', this.client.team.name);
-    let self = this;
-    _.each(_.values(self.client.channels), function(channel) {
-      if (channel.name === self._notifyChannelName) {
-        self._notifyChannel = channel;
-      }
-    });
-
-    self._updateUsers();
-
-    if (self._initCallback) {
-      self._initCallback();
-    }
-  },
-
-  /**
-   * Callback when RTC client received error
-   */
-  _clientOnError(error) {
-    console.log('[NotificationService.TeamClient] clientOnError: ', error);
-  },
-
   _postMessage(messageData) {
-    this.client._apiCall('chat.postMessage', messageData);
+    let notifyChannelName = Meteor.settings.notificationService.slack.channelName;
+    SlackLog.log(notifyChannelName, messageData);
   },
 
-  _updateUsers() {
+  /**
+   * Insert clionelab's slack team members, to allow association with dashboard assistant
+   */
+  updateUsers() {
     let self = this;
-    _.each(self.client.users, function(user) {
+    let data = SlackLog._api('users.list', {});
+    let members = data.members;
+    _.each(members, function(user) {
       NotificationService.SlackUsers.upsertUser(user);
     });
   }
