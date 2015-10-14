@@ -11,35 +11,23 @@ NotificationService.AlertPoliciesExecutor = {
 
   startup() {
     let self = this;
+    self._slackClient = _.extend({}, NotificationService.SlackTeamClient);
+    self._slackClient.updateUsers();
 
-    self._connectSlackClient(function() {
-      console.log("[NotificationService.AlertPoliciesExecutor] slack connected");
-
-      if (self._observeHandler) {
-        self._observeHandler.stop();
+    if (self._observeHandler) {
+      self._observeHandler.stop();
+    }
+    self._observeHandler = NotificationService.AlertPolicies.find({}).observe({
+      executor: self,
+      added(doc) {
+        console.log("[NotificationService.AlertPoliciesExecutor] new policy: ", doc);
+        this.executor._startAlertPolicy(doc);
+      },
+      removed(doc) {
+        console.log("[NotificationService.AlertPoliciesExecutor] removed policy: ", doc);
+        this.executor._endAlertPolicy(doc);
       }
-      self._observeHandler = NotificationService.AlertPolicies.find({}).observe({
-        executor: self,
-        added(doc) {
-          console.log("[NotificationService.AlertPoliciesExecutor] new policy: ", doc);
-          this.executor._startAlertPolicy(doc);
-        },
-        removed(doc) {
-          console.log("[NotificationService.AlertPoliciesExecutor] removed policy: ", doc);
-          this.executor._endAlertPolicy(doc);
-        }
-      });
     });
-  },
-
-  /**
-   * Connect slack client to send notification to
-   */
-  _connectSlackClient(callback) {
-    let token = Meteor.settings.notificationService.slack.token;
-    let channelName = Meteor.settings.notificationService.slack.channelName;
-    this._slackClient = _.extend({}, NotificationService.SlackTeamClient);
-    this._slackClient.init(token, channelName, callback);
   },
 
   /**
@@ -55,6 +43,7 @@ NotificationService.AlertPoliciesExecutor = {
 
       self._timeoutHandlers[alertPolicy._id][index] = Meteor.setTimeout(Meteor.bindEnvironment(function() {
         console.log("executing schedule: ", schedule);
+
         self._slackClient.sendNotification({
           dChannelId: alertPolicy.channelId,
           alertTarget: schedule.target
