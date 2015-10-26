@@ -1,0 +1,22 @@
+<template name="telegramBotSetup">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <p>List of auth token</p>
+      <ul>
+        {{#each bots}}
+          <li>{{token}} [{{telegramUsername}}]</li>
+        {{/each}}
+      </ul>
+    </div>
+    <div class="panel-footer">
+      <form id="add-bot-form" class="form-inline">
+        <div class="input-group">
+          <input type="text" name="authToken" class="form-control" placeholder="Auth Token">
+        </div>
+        <button type="submit" class="btn btn-default">Add</button>
+      </form>
+    </div>
+  </div>
+</template>
+
+
