@@ -35,7 +35,8 @@ D.Channels.allow({
 });
 
 D.Channels.Categories = {
-  SLACK: 'SLACK'
+  SLACK: 'SLACK',
+  TELEGRAM: 'TELEGRAM'
 }
 
 D.Channel = {
