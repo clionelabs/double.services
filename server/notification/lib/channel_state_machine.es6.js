@@ -32,20 +32,20 @@ NotificationService.ChannelStateMachine = function(channel) {
       onenterpending: function(event, from, to) {
         let channel = this;
         if (from === 'none') return;
-        console.log("onenterpending: ", channel.extra.channel.name, event, from, to);
+        console.log("onenterpending: ", channel.identifier, event, from, to);
         NotificationService.Autoresponder.onChannelPending(channel);
         NotificationService.AlertPolicies.createForChannelIfNotExists(channel);
       },
       onenterreplied: function(event, from, to) {
         let channel = this;
         if (from === 'none') return;
-        console.log("onenterpending: ", channel.extra.channel.name, event, from, to);
+        console.log("onenterreplied: ", channel.identifier, event, from, to);
         NotificationService.AlertPolicies.removeForChannel(channel);
       },
       onenteracknowledged: function(event, from, to) {
         let channel = this;
         if (from === 'none') return;
-        console.log("onenterpending: ", channel.extra.channel.name, event, from, to);
+        console.log("onenteracknowledged: ", channel.identifier, event, from, to);
         NotificationService.AlertPolicies.removeForChannel(channel);
       }
     }
