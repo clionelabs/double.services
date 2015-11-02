@@ -1,4 +1,4 @@
-<Template name="monitorMain">
+<Template name="slackMonitor">
   <div id="monitor-main-container" class="container-fluid">
     <div class="panel panel-default">
       <div class="panel-body">
@@ -13,7 +13,7 @@
           </thead>
           <tbody>
             {{#each teams}}
-              {{> monitorTeam}}
+              {{> slackMonitorTeam}}
             {{/each}}
           </tbody>
         </table>
@@ -22,7 +22,7 @@
   </div>
 </Template>
 
-<Template name="monitorTeam">
+<Template name="slackMonitorTeam">
   <tr>
     <td>
       {{teamName}}

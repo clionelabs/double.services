@@ -1,0 +1,11 @@
+<Template name="adminMain">
+  <div id="admin-dashboard">
+    <ul class="nav nav-tabs">
+      <li role="presentation" class="slack-tab {{#if isSlackTabSelected}} active{{/if}}"><a href="#">Slack</a></li>
+      <li role="presentation" class="telegram-tab {{#if isTelegramTabSelected}} active{{/if}}"><a href="#">Telegram</a></li>
+      <li role="presentation" class="notification-tab {{#if isNotificationTabSelected}} active{{/if}}"><a href="#">Notification</a></li>
+      <li role="presentation" class="channels-tab {{#if isChannelsTabSelected}} active{{/if}}"><a href="#">Channels</a></li>
+    </ul>
+    {{> Template.dynamic template=contentTemplateName}}
+  </div>
+</Template>

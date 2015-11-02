@@ -1,10 +1,10 @@
-Template.monitorMain.helpers({
+Template.slackMonitor.helpers({
   teams() {
     return SlackService.Teams.find();
   }
 });
 
-Template.monitorTeam.helpers({
+Template.slackMonitorTeam.helpers({
   isWSGood() {
     return moment().diff(moment(this.monitoring.wsStatus.lastPong), 's') < 30;
   },
@@ -31,3 +31,4 @@ Template.monitorTeam.helpers({
     return moment(this.monitoring.lastChannelsCheckedAt).format("HH:mm:ss");
   }
 });
+

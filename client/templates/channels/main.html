@@ -1,0 +1,31 @@
+<Template name="channelsMain">
+  <div id="telegram-main-container" class="container-fluid">
+    <div class="alert alert-info" role="alert">
+      List of configured DChannels
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Name</th>
+              <th>Last Message</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each channels}}
+              <tr class="channel-row">
+                <td>{{type}}</td>
+                <td>{{name}}</td>
+                <td>{{formatTS extra.lastMessageTS}}</td>
+                <td>{{notification.state}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</Template>

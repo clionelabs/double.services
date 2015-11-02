@@ -1,20 +1,9 @@
 <Template name="notificationMain">
   <div id="notification-main-container" class="container-fluid">
-    {{> notificationSlackUsers}}
-    <div class="panel panel-default">
-      <div class="panel-body">
-        <table class="table table-hover">
-          <tbody>
-            {{#each channels}}
-              <tr>
-                <td>{{extra.team.name}} - {{extra.channel.name}}</td>
-                <td>{{notification.state}}</td>
-              </tr>
-            {{/each}}
-          </tbody>
-        </table>
-      </div>
+    <div class="alert alert-info" role="alert">
+      Mapping between double slack team members with double dashboard assistants
     </div>
+    {{> notificationSlackUsers}}
   </div>
 </Template>
 

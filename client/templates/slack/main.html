@@ -1,16 +1,10 @@
 <Template name="slackMain">
   <div id="slack-main-container" class="container-fluid">
-    <ul class="nav nav-tabs">
-      {{#each teams}}
-        <li role="presentation" class="team-tab{{#if isActiveTeam this}} active{{/if}}"><a href="#">{{teamName}}</a></li>
-      {{/each}}
-      <li role="presentation" class="team-setup-tab{{#if isSetup}} active{{/if}}"><a href="#">Team Setup</a></li>
-    </ul>
+    <div class="alert alert-info" role="alert">
+      Clients' slack teams setup. Input the API token here.
+    </div>
+    {{> slackTeamSetup}}
 
-    {{#if activeTeam}}
-      {{> slackTeam activeTeam}}
-    {{else}}
-      {{> slackTeamSetup}}
-    {{/if}}
+    {{> slackMonitor}}
   </div>
 </Template>
