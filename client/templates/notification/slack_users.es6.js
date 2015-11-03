@@ -15,7 +15,13 @@ Template.notificationSlackUserRow.helpers({
         return '--';
       }
     }
-    let user = Users.findOne(this.assistantId) || emptyUser;
+
+    let user;
+    if (!this.assistantId) {
+      user = emptyUser;
+    } else {
+      user = Users.findOne(this.assistantId) || emptyUser;
+    }
     return user.displayName();
   },
 
