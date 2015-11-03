@@ -461,10 +461,10 @@ SlackService.TeamClient = {
   _handleOutingMessage(dMessage) {
     let self = this;
     let dChannel = D.Channels.findOne(dMessage.channelId);
-    let channelId = dChannel.extra.channel.id;
     if (dChannel.category !== D.Channels.Categories.SLACK) {
       return;
     }
+    let channelId = dChannel.extra.channel.id;
     let channel = self.client.getChannelGroupOrDMByID(channelId);
     if (!channel) return;
 

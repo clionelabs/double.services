@@ -17,6 +17,8 @@ RelayService.Monitor = {
     let channelName = '';
     if (channel.category === D.Channels.Categories.SLACK) {
       channelName = `${channel.extra.channel.name} [${channel.extra.channel.id.charAt(0)}]`;
+    } else if (channel.category === D.Channels.Categories.TELEGRAM) {
+      channelName = `${channel.extra.first_name} [T]`;
     }
 
     let icon_emoji = message.inOut === D.Messages.InOut.OUT? ':troll:': ':alien:';
