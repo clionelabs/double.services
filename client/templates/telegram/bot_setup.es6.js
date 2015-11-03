@@ -1,3 +1,9 @@
+Template.telegramBotSetup.helpers({
+  bots() {
+    return TelegramService.Bots.find();
+  }
+});
+
 Template.telegramBotSetup.events({
   "submit #add-bot-form": function(event) {
     event.preventDefault();
