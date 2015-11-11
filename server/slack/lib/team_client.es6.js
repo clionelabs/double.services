@@ -312,17 +312,20 @@ SlackService.TeamClient = {
       }
       D.Messages.insert(options);
 
-      let channelOptions = {
-        $set: {
-          lastMessage: {
-            inOut: inOut,
-            isAutoReply: isAutoReply,
-            timestamp: timestamp
-          }
-        },
-        $max: {'extra.lastMessageTS': message.ts}
+      let dChannel = D.Channels.findOne(dChannelId);
+      if (!dChannel.extra.lastMessageTS || dChannel.extra.lastMessageTS < message.ts) {
+        let channelOptions = {
+          $set: {
+            lastMessage: {
+              inOut: inOut,
+              isAutoReply: isAutoReply,
+              timestamp: timestamp
+            }
+          },
+          $max: {'extra.lastMessageTS': message.ts}
+        }
+        D.Channels.update(dChannelId, channelOptions);
       }
-      D.Channels.update(dChannelId, channelOptions);
     }
   },
 
