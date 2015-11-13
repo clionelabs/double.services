@@ -20,16 +20,28 @@ RelayService.Monitor = {
     } else if (channel.category === D.Channels.Categories.TELEGRAM) {
       channelName = `${channel.extra.first_name} [T]`;
     }
+    let channelURL = this._channelURL(channel);
+    let messageContent = `${message.content}\n[Conversation: ${channelURL}]`;
 
     let icon_emoji = message.inOut === D.Messages.InOut.OUT? ':troll:': ':alien:';
     let userName = `${message.userName} - ${channelName}`;
     let options = {
-      text: message.content,
+      text: messageContent,
       username: userName,
       icon_emoji: icon_emoji
     };
 
     SlackLog.log(relayChannelName, options);
+  },
+
+  // double dashboard url
+  _channelURL(dChannel) {
+    let rootURL = D.Configs.get(D.Configs.Keys.DASHBOARD_APP_URL);
+    if (rootURL) {
+      return `${rootURL}channel/${dChannel._id}`;
+    } else {
+      return '';
+    }
   },
 
   _startProcessingMessages() {

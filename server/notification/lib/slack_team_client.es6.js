@@ -12,9 +12,9 @@ NotificationService.SlackTeamClient = {
 
     let messageData;
     if (data.alertTarget === NotificationService.AlertPolicies.AlertTargets.GLOBAL) {
-      messageData = this._globalNotifyMessage(customer);
+      messageData = this._globalNotifyMessage(customer, dChannel);
     } else if (data.alertTarget === NotificationService.AlertPolicies.AlertTargets.INDIVIDUAL) {
-      messageData = this._individualNotifyMessage(customer, assistant);
+      messageData = this._individualNotifyMessage(customer, assistant, dChannel);
     }
     this._postMessage(messageData);
   },
@@ -39,10 +39,21 @@ NotificationService.SlackTeamClient = {
     }
   },
 
-  _globalNotifyMessage(customer) {
+  // double dashboard url
+  _channelURL(dChannel) {
+    let rootURL = D.Configs.get(D.Configs.Keys.DASHBOARD_APP_URL);
+    if (rootURL) {
+      return `${rootURL}channel/${dChannel._id}`;
+    } else {
+      return '';
+    }
+  },
+
+  _globalNotifyMessage(customer, dChannel) {
     let hash = this._globalHash();
     let clientName = customer.displayName();
-    let message = `${hash}: I am ${clientName}. I am still waiting~~`;
+    let channelURL = this._channelURL(dChannel);
+    let message = `${hash}: I am ${clientName}. I am still waiting~~\n[Conversation: ${channelURL}]`;
 
     return {
       // channel: this._notifyChannel.id,
@@ -52,10 +63,11 @@ NotificationService.SlackTeamClient = {
     }
   },
 
-  _individualNotifyMessage(customer, assistant) {
+  _individualNotifyMessage(customer, assistant, dChannel) {
     let hash = this._individualHash(assistant);
     let clientName = customer.displayName();
-    let message = `Hey ${hash}, I am ${clientName}. I am waiting for your reply~~`;
+    let channelURL = this._channelURL(dChannel);
+    let message = `Hey ${hash}, I am ${clientName}. I am waiting for your reply~~\n[Conversation: ${channelURL}]`;
 
     return {
       // channel: this._notifyChannel.id,
