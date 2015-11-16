@@ -20,7 +20,7 @@ RelayService.Monitor = {
     } else if (channel.category === D.Channels.Categories.TELEGRAM) {
       channelName = `${channel.extra.first_name} [T]`;
     }
-    let channelURL = this._channelURL(channel);
+    let channelURL = channel.dashboardURL;
     let messageContent = `${message.content}\n[Conversation: ${channelURL}]`;
 
     let icon_emoji = message.inOut === D.Messages.InOut.OUT? ':troll:': ':alien:';
@@ -32,16 +32,6 @@ RelayService.Monitor = {
     };
 
     SlackLog.log(relayChannelName, options);
-  },
-
-  // double dashboard url
-  _channelURL(dChannel) {
-    let rootURL = D.Configs.get(D.Configs.Keys.DASHBOARD_APP_URL);
-    if (rootURL) {
-      return `${rootURL}channel/${dChannel._id}`;
-    } else {
-      return '';
-    }
   },
 
   _startProcessingMessages() {

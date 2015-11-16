@@ -39,20 +39,10 @@ NotificationService.SlackTeamClient = {
     }
   },
 
-  // double dashboard url
-  _channelURL(dChannel) {
-    let rootURL = D.Configs.get(D.Configs.Keys.DASHBOARD_APP_URL);
-    if (rootURL) {
-      return `${rootURL}channel/${dChannel._id}`;
-    } else {
-      return '';
-    }
-  },
-
   _globalNotifyMessage(customer, dChannel) {
     let hash = this._globalHash();
     let clientName = customer.displayName();
-    let channelURL = this._channelURL(dChannel);
+    let channelURL = dChannel.dashboardURL;
     let message = `${hash}: I am ${clientName}. I am still waiting~~\n[Conversation: ${channelURL}]`;
 
     return {
