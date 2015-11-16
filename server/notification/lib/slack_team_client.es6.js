@@ -6,15 +6,12 @@ NotificationService.SlackTeamClient = {
    */
   sendNotification(data) {
     let dChannelId = data.dChannelId;
-    let dChannel = D.Channels.findOne(dChannelId);
-    let customer = Users.findOneCustomer(dChannel.customerId);
-    let assistant = customer.assistant();
 
     let messageData;
     if (data.alertTarget === NotificationService.AlertPolicies.AlertTargets.GLOBAL) {
-      messageData = this._globalNotifyMessage(customer);
+      messageData = this._globalNotifyMessage(dChannelId);
     } else if (data.alertTarget === NotificationService.AlertPolicies.AlertTargets.INDIVIDUAL) {
-      messageData = this._individualNotifyMessage(customer, assistant);
+      messageData = this._individualNotifyMessage(dChannelId);
     }
     this._postMessage(messageData);
   },
@@ -39,10 +36,14 @@ NotificationService.SlackTeamClient = {
     }
   },
 
-  _globalNotifyMessage(customer) {
+  _globalNotifyMessage(dChannelId) {
+    let dChannel = D.Channels.findOne(dChannelId);
+    let customer = Users.findOneCustomer(dChannel.customerId);
+
     let hash = this._globalHash();
     let clientName = customer.displayName();
-    let message = `${hash}: I am ${clientName}. I am still waiting~~`;
+    let channelURL = dChannel.dashboardURL;
+    let message = `${hash}: I am ${clientName}. I am still waiting~~\n[Conversation: ${channelURL}]`;
 
     return {
       // channel: this._notifyChannel.id,
@@ -52,10 +53,15 @@ NotificationService.SlackTeamClient = {
     }
   },
 
-  _individualNotifyMessage(customer, assistant) {
+  _individualNotifyMessage(dChannelId) {
+    let dChannel = D.Channels.findOne(dChannelId);
+    let customer = Users.findOneCustomer(dChannel.customerId);
+    let assistant = customer.assistant();
+
     let hash = this._individualHash(assistant);
     let clientName = customer.displayName();
-    let message = `Hey ${hash}, I am ${clientName}. I am waiting for your reply~~`;
+    let channelURL = dChannel.dashboardURL;
+    let message = `Hey ${hash}, I am ${clientName}. I am waiting for your reply~~\n[Conversation: ${channelURL}]`;
 
     return {
       // channel: this._notifyChannel.id,

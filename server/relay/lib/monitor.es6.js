@@ -20,11 +20,13 @@ RelayService.Monitor = {
     } else if (channel.category === D.Channels.Categories.TELEGRAM) {
       channelName = `${channel.extra.first_name} [T]`;
     }
+    let channelURL = channel.dashboardURL;
+    let messageContent = `${message.content}\n[Conversation: ${channelURL}]`;
 
     let icon_emoji = message.inOut === D.Messages.InOut.OUT? ':troll:': ':alien:';
     let userName = `${message.userName} - ${channelName}`;
     let options = {
-      text: message.content,
+      text: messageContent,
       username: userName,
       icon_emoji: icon_emoji
     };
