@@ -21,7 +21,7 @@ RelayService.Monitor = {
       channelName = `${channel.extra.first_name} [T]`;
     }
     let channelURL = channel.dashboardURL;
-    let messageContent = `${message.content}\n[Conversation: ${channelURL}]`;
+    let messageContent = `${message.content}\n <${channelURL}|full...>`;
 
     let icon_emoji = message.inOut === D.Messages.InOut.OUT? ':troll:': ':alien:';
     let userName = `${message.userName} - ${channelName}`;
