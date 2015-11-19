@@ -61,10 +61,9 @@ NotificationService.SlackTeamClient = {
     let hash = this._individualHash(assistant);
     let clientName = customer.displayName();
     let channelURL = dChannel.dashboardURL;
-    let message = `Hey ${hash}, I am ${clientName}. I am waiting for your reply~~\n[Conversation: ${channelURL}]`;
+    let message = `Hey ${hash}, I am ${clientName}. I am waiting for your reply~~\n<${channelURL}|full...>`;
 
     return {
-      // channel: this._notifyChannel.id,
       text: message,
       username: clientName,
       icon_emoji: ':kissing_heart:'
