@@ -1,0 +1,18 @@
+<template name="assistantInvoiceActualFormTimeBasedItem">
+  <tr>
+    <td>
+      {{title}}
+    </td>
+    <td>
+      {{formatDate date}}
+    </td>
+    <td>
+      <div class='updates'>
+        {{ updates }}
+      </div>
+    </td>
+    <td>
+      {{formatDurationPrecise roundedInSecondTotalDuration }}
+    </td>
+  </tr>
+</template>

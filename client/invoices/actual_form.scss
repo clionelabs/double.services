@@ -1,0 +1,119 @@
+@import '../variables';
+
+.invoice-printout {
+  margin: 15px;
+  .key {
+    text-align: right;
+  }
+  .line {
+    display: flex;
+    flex-direction: row;
+  }
+  header {
+    background: $double-grey2;
+    color: $double-dark-blue;
+    font-size: 1.889em;
+    text-align: center;
+    padding: 30px 0px;
+    margin: 15px 0px;
+  }
+
+  .summaries {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0px 10px;
+    .service-period {
+      .key {
+        width: 100px;
+      }
+      .value {
+        margin-left: 1em;
+      }
+    }
+    .calculations {
+      .key {
+        width: 160px;
+      }
+      .value {
+        width: 85px;
+        text-align: right;
+        margin-left: 2em;
+        .fa {
+          margin-left: 5px;
+        }
+      }
+      .minute {
+        margin-bottom: 10px;
+      }
+      .money {
+        margin-bottom: 10px;
+      }
+      .credit, .effective-rate {
+        width: 100%;
+        text-align: right;
+        padding: 0px;
+        border: 1px solid $double-grey2;
+        .not-editable {
+          border: 0;
+        }
+      }
+    }
+    margin-bottom: 15px;
+  }
+
+
+  table {
+    margin-bottom: 0px;
+  }
+
+  .time-based-items, .one-time-purchases, .memberships {
+    tr {
+      th {
+        background: $double-grey2;
+        border-bottom: 1px solid black;
+
+      }
+      &:nth-child(2n+1) {
+        background: $double-grey;
+      }
+    }
+    th, td {
+      padding: 5px 10px;
+      &:last-child {
+        width: 10%;
+        min-width: 120px;
+        display : table-cell;
+        text-align: right;
+      }
+    }
+  }
+
+  .time-based-items, .one-time-purchases {
+    tr {
+      th, td {
+        &:first-child {
+          width: 25%;
+          min-width : 120px;
+        }
+        &:nth-child(2) {
+          width: 15%;
+          min-width: 120px;
+        }
+        &:nth-child(3) {
+          width: 50%;
+        }
+        &:last-child {
+          width: 10%;
+          min-width: 120px;
+          display : table-cell;
+          text-align: right;
+        }
+      }
+    }
+  }
+
+  footer {
+    margin-top: 20px;
+  }
+}
