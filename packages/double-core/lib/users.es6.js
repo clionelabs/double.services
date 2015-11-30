@@ -71,8 +71,15 @@ D.Users = {
       return _.extend(doc, D.User);
     }}, options);
     return Meteor.users.findOne(selector, extendedOptions);
+  },
+  showDisplayOnlyOptions() {
+    return {
+      profile : 1,
+      'payment.isAuthorized' : 1,
+      'roles' : 1
+    }
   }
-}
+};
 
 D.User = {
   firstName() {
@@ -83,5 +90,8 @@ D.User = {
   },
   displayNameWithInitial() {
     return this.profile.firstname + " " + this.profile.lastname[0] + ".";
+  },
+  hasPaymentMethod() {
+    return this.payment && this.payment.isAuthorized;
   }
 };

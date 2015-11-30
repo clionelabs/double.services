@@ -20,7 +20,7 @@ D.Events.allow({
 
 D.Events.create = (type, data) => {
   D.Events.insert({type: type, data: data, isProcessed: false, createdAt: moment().valueOf()});
-}
+};
 
 /**
  * The listener callback should return a true value when the event is processed successfuly
