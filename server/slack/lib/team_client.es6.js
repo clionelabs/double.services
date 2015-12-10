@@ -21,7 +21,12 @@ SlackService.TeamClient = {
   init(authToken) {
     let self = this;
     self._authToken = authToken;
-    self.connect();
+
+    if (self.testTokenValidity()) {
+      self.connect();
+    } else {
+      console.log("Invalid token: ", self._authToken);
+    }
   },
 
   connect() {
@@ -34,17 +39,21 @@ SlackService.TeamClient = {
     self.client.on('messageSent', Meteor.bindEnvironment((message) => {self._clientOnMessageSent(message)}));
     self.client.on('presenceChange', Meteor.bindEnvironment((user, presence) => {self._clientOnPresenceChange(user, presence)}));
     self.client.on('error', Meteor.bindEnvironment((error) => {self._clientOnError(error)}));
-
-    try {
-      self.client.login();
-    } catch (ex) {
-      console.log("[SlackService.TeamClient] login error for teamToken: ", self._authToken, "ex: ", ex);
-    }
+    self.client.login();
   },
 
   disconnect() {
     let self = this;
     self.client.disconnect();
+  },
+
+  // test validity of the current token
+  testTokenValidity() {
+    let self = this;
+    let url = 'https://slack.com/api/auth.test';
+    let result = HTTP.post(url, {params: {token: self._authToken}});
+    let data = result.data;
+    return data.ok;
   },
 
   /**
