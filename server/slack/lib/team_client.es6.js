@@ -34,7 +34,12 @@ SlackService.TeamClient = {
     self.client.on('messageSent', Meteor.bindEnvironment((message) => {self._clientOnMessageSent(message)}));
     self.client.on('presenceChange', Meteor.bindEnvironment((user, presence) => {self._clientOnPresenceChange(user, presence)}));
     self.client.on('error', Meteor.bindEnvironment((error) => {self._clientOnError(error)}));
-    self.client.login();
+
+    try {
+      self.client.login();
+    } catch (ex) {
+      console.log("[SlackService.TeamClient] login error for teamToken: ", self._authToken, "ex: ", ex);
+    }
   },
 
   disconnect() {
